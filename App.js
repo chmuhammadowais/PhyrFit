@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 import { useFonts } from 'expo-font';
-import Splash from './Screens/Splash';
+import SignIn from './Screens/SignIn';
+import Splash from "./Screens/Splash";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -23,17 +23,5 @@ export default function App() {
     return <Splash />;
   }
 
-  return <Text>Hello World</Text>;
+  return <SignIn />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    fontFamily: 'roboto_black',
-  },
-});
