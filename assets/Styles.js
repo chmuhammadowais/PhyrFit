@@ -22,6 +22,16 @@ const Styles = StyleSheet.create({
         justifyContent: "flex-start",
         alignItems: "center"
     },
+    sub_container_c:{
+        width: '90%',
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    scrollContainer: {
+        width: 410,
+        justifyContent: "center",
+        alignItems: "center",
+    },
     loading_text:{
         color: Colors.PrimaryColorFg,
         fontSize: 20
@@ -35,7 +45,6 @@ const Styles = StyleSheet.create({
         color: Colors.PrimaryColorBg,
         borderRadius: 10,
         width: '90%',
-        height: 40,
         fontSize: 18,
         padding: 5,
         marginBottom: 20
@@ -52,9 +61,11 @@ const Styles = StyleSheet.create({
         alignItems: "center",
         overflow: "hidden",
         backgroundColor: Colors.ButtonColor,
-        width: 200,
+        width: 170,
         borderRadius: 10,
         height: 40,
+        marginTop: 20,
+        marginBottom: 10
     },
     buttonInnerContainer:{
         justifyContent:'center',
@@ -66,6 +77,20 @@ const Styles = StyleSheet.create({
         fontFamily: 'roboto_regular',
         color: Colors.PrimaryColorFg,
         fontSize: 20,
+    },
+    pickerContainer:{
+        width: '90%',
+        height: 40,
+        backgroundColor: Colors.LightGray,
+        borderRadius: 10,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    pickerStyle:{
+        width: '105%',
+        color: '#787878',
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+        borderRadius: 10,
     }
 })
 export default Styles;

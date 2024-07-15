@@ -1,7 +1,10 @@
 import React from 'react';
 import { useFonts } from 'expo-font';
 import SignIn from './Screens/SignIn';
+import SignUp from "./Screens/SignUp";
 import Splash from "./Screens/Splash";
+import {NavigationContainer} from "@react-navigation/native";
+import {createStackNavigator} from "@react-navigation/stack";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -19,9 +22,16 @@ export default function App() {
     'roboto_thin_italic': require('./assets/fonts/Roboto-ThinItalic.ttf'),
   });
 
+  const Stack = createStackNavigator();
   if (!fontsLoaded) {
     return <Splash />;
   }
-
-  return <SignIn />;
+  return(
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{animationEnabled: true, headerShown: false}}>
+          <Stack.Screen name={"SignIn"} component={SignIn} />
+          <Stack.Screen name={"SignUp"} component={SignUp} />
+        </Stack.Navigator>
+      </NavigationContainer>
+  )
 }
