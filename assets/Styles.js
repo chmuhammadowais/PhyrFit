@@ -18,7 +18,7 @@ const Styles = StyleSheet.create({
     },
     sub_container_b:{
         width: '100%',
-        flex: 1.5,
+        flex: 3,
         justifyContent: "flex-start",
         alignItems: "center"
     },
@@ -91,6 +91,14 @@ const Styles = StyleSheet.create({
         color: '#787878',
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         borderRadius: 10,
+    },
+    errorText:{
+        width: '90%',
+        fontFamily: "roboto_regular",
+        color: Colors.Red,
+        fontSize: 15,
+        textAlign: "center",
+        marginBottom: 10
     }
 })
 export default Styles;

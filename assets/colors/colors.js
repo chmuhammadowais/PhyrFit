@@ -6,4 +6,5 @@ export const Colors = {
     FilledCircleDark : '#7565BC',
     LightGray: '#D9D9D9',
     DarkGray: '#AEAEAE',
+    Red: '#FF0000'
 }

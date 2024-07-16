@@ -5,7 +5,15 @@ import Styles from '../assets/Styles';
 import InputField from '../Components/InputField';
 import OptionsPicker from "../Components/OptionsPicker";
 export default function SignUp() {
+    const [fullName, setFullName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [phone, setPhone] = useState("");
+    const [height, setHeight] = useState("");
+    const [weight, setWeight] = useState("");
+    const [age, setAge] = useState("");
     const [selectedItem, setSelectedItem] = useState(null);
+    const [error, setError] = useState("");
     const items = [
         {
             label: "Loose Weight",
@@ -18,7 +26,27 @@ export default function SignUp() {
         {
             label: "Build Muscle",
             value: "Build Muscle"
-        }]
+        }];
+    function handleSignup(){
+        console.log(fullName, email, password, phone, age, height, weight, selectedItem)
+        if(fullName.trim() === "" || email.trim() === "" || password.trim() === "" || phone.trim() === "" || age.trim() === "" || height.trim() === "" || weight.trim() === ""){
+            setError("Please enter all the fields.");
+        }
+        else if(!email.trim().includes('@') || !email.trim().endsWith('.com')){
+            setError("Please provide a valid email address");
+        }
+        else if(password.trim().length < 6){
+            setError("Password should contain more than 6 characters")
+        }
+        else if(Number(age.trim()) <= 0 || Number(age.trim() <= 12)){
+            setError("Age requirement is 13 and above")
+        }
+        else {
+            setError("");
+            //TODO - add API call
+            //     - check manage the state
+        }
+    }
     return (
         <View style={Styles.container}>
             <StatusBar barStyle={'default'} />
@@ -30,20 +58,22 @@ export default function SignUp() {
                 behavior={Platform.OS === 'ios' ? 'padding' : null}
                 keyboardVerticalOffset={30}>
                 <Text style={Styles.form_heading}>SignUp</Text>
+                <Text style={Styles.errorText}>{error ? error : null}</Text>
                 <ScrollView contentContainerStyle={Styles.scrollContainer}>
-                    <InputField style={Styles.input_container} placeholder={'Full Name'} />
-                    <InputField style={Styles.input_container} placeholder={'Email'} inputMode={'email'} keyboardType={'email-address'} />
-                    <InputField style={Styles.input_container} placeholder={'Password'} secureTextEntry={true} />
-                    <InputField style={Styles.input_container} placeholder={'Phone'} inputMode={'tel'} />
+                    <InputField style={Styles.input_container} placeholder={'Full Name'} setText={setFullName}/>
+                    <InputField style={Styles.input_container} placeholder={'Email'} inputMode={'email'} keyboardType={'email-address'} setText={setEmail}/>
+                    <InputField style={Styles.input_container} placeholder={'Password'} secureTextEntry={true} setText={setPassword}/>
+                    <InputField style={Styles.input_container} placeholder={'Phone'} inputMode={'tel'} setText={setPhone}/>
+                    <InputField style={Styles.input_container} placeholder={'Age'} keyboardType={'numeric'} setText={setAge}/>
                     <View style={Styles.sub_container_c} >
-                        <InputField placeholder={'Height'} secureTextEntry={false} keyboardType={'decimal-pad'} width={'48%'} />
-                        <InputField placeholder={'Weight'} secureTextEntry={false} keyboardType={'decimal-pad'} width={'48%'} />
+                        <InputField placeholder={'Height (cm)'} secureTextEntry={false} keyboardType={'decimal-pad'} width={'48%'} setText={setHeight}/>
+                        <InputField placeholder={'Weight (KG)'} secureTextEntry={false} keyboardType={'decimal-pad'} width={'48%'} setText={setWeight}/>
                     </View>
 
                 <OptionsPicker selectedItem={selectedItem} setSelectedItem={setSelectedItem} items={items}/>
 
                 </ScrollView>
-                <Button text={'Sign up'} />
+                <Button text={'Sign up'} onPress={handleSignup}/>
             </KeyboardAvoidingView>
         </View>
     );
