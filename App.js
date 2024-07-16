@@ -5,7 +5,9 @@ import SignUp from "./Screens/SignUp";
 import Splash from "./Screens/Splash";
 import {NavigationContainer} from "@react-navigation/native";
 import {createStackNavigator} from "@react-navigation/stack";
-import UserContextProvider, { UserContext} from "./Store/store"
+import UserContextProvider from "./Store/store"
+import Home from "./Screens/Home";
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     'roboto_black': require('./assets/fonts/Roboto-Black.ttf'),
@@ -32,6 +34,7 @@ export default function App() {
           <Stack.Navigator screenOptions={{animationEnabled: true, headerShown: false}}>
             <Stack.Screen name={"SignIn"} component={SignIn} />
             <Stack.Screen name={"SignUp"} component={SignUp} />
+            <Stack.Screen name={"Home"} component={Home} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserContextProvider>
