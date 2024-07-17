@@ -4,7 +4,7 @@ import CircularButton from "./CircularButton";
 import {LinearGradient} from "expo-linear-gradient";
 import {Colors} from "../assets/colors/colors";
 
-export default function TodayCardView(){
+export default function BasicCardView({heading, subText_a, subText_b, iconPath_major, iconPath_a, iconPath_b}){
     return(
         //vertical view
         <LinearGradient
@@ -14,20 +14,20 @@ export default function TodayCardView(){
             style={Styles.cardViewContainer}>
             {/*Horizontal view*/}
             <View style={[Styles.sub_container_horizontal, {width: '95%'}]}>
-                <Text style={Styles.cardViewHeading}>Today's Focus</Text>
-                <Image style={Styles.iconSmall} source={require("../assets/icons/exercise.png")} />
+                <Text style={Styles.cardViewHeading}>{heading}</Text>
+                <Image style={Styles.iconSmall} source={iconPath_major} />
             </View>
 
             {/*Horizontal view*/}
             <View style={[Styles.sub_container_horizontal, {width: '95%'}]}>
                 <View>
-                    <Text style={Styles.cardViewText}>Today's Focus: Chest</Text>
-                    <Text style={Styles.cardViewText}>Reminder: 10:00 am</Text>
+                    <Text style={Styles.cardViewText}>{subText_a.length < 40 ? subText_a : subText_a.substring(0, 40).concat('...')}</Text>
+                    <Text style={Styles.cardViewText}>{subText_b.length < 40 ? subText_b : subText_b.substring(0, 40).concat('...')}</Text>
                 </View>
 
                 <View style={[Styles.sub_container_horizontal, {width: "auto"}]}>
-                   <CircularButton source={require('../assets/icons/complete.png')}/>
-                    <CircularButton source={require('../assets/icons/incomplete.png')}/>
+                   <CircularButton source={iconPath_a}/>
+                    <CircularButton source={iconPath_b}/>
                 </View>
 
             </View>
