@@ -33,10 +33,10 @@ export default function SignIn({ navigation }) {
                     weight: '70',
                     target: 'Weight Loss'
                 });
-                navigation.navigate('Home');
+                navigation.navigate('Main');
                 navigation.reset({
                     index: 0,
-                    routes: [{ name: 'Home' }]
+                    routes: [{ name: 'Main' }]
                 });
             }
         }

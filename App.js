@@ -1,12 +1,16 @@
 import React from 'react';
 import { useFonts } from 'expo-font';
+import { Image } from 'react-native';
 import SignIn from './Screens/SignIn';
 import SignUp from "./Screens/SignUp";
 import Splash from "./Screens/Splash";
-import {NavigationContainer} from "@react-navigation/native";
-import {createStackNavigator} from "@react-navigation/stack";
-import UserContextProvider from "./Store/store"
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import UserContextProvider from "./Store/store";
 import Home from "./Screens/Home";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import {Colors} from "./assets/colors/colors";
+import Reminders from "./Screens/Reminders";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -25,19 +29,54 @@ export default function App() {
   });
 
   const Stack = createStackNavigator();
+  const Tab = createBottomTabNavigator();
   if (!fontsLoaded) {
     return <Splash />;
   }
-  return(
+
+  function BottomTabs() {
+    return (
+        <Tab.Navigator
+            screenOptions={
+          {animationEnabled: true, headerShown: false,  tabBarStyle: { backgroundColor: Colors.ButtonColor }}}>
+
+          <Tab.Screen
+              name="Home"
+              component={Home}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                    <Image
+                        source={require('./assets/icons/home-white.png')}
+                        style={{ width: size, height: size, tintColor: Colors.PrimaryColorFg }}
+                    />
+                ),
+              }}
+          />
+          <Tab.Screen
+              name="Reminders"
+              component={Reminders}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                    <Image
+                        source={require('./assets/icons/reminder-white.png')}
+                        style={{ width: size, height: size, tintColor: Colors.PrimaryColorFg }}
+                    />
+                ),
+              }}
+          />
+        </Tab.Navigator>
+    );
+  }
+
+  return (
       <UserContextProvider>
         <NavigationContainer>
-          <Stack.Navigator screenOptions={{animationEnabled: true, headerShown: false}}>
+          <Stack.Navigator screenOptions={{ animationEnabled: true, headerShown: false }}>
             <Stack.Screen name={"SignIn"} component={SignIn} />
             <Stack.Screen name={"SignUp"} component={SignUp} />
-            <Stack.Screen name={"Home"} component={Home} />
+            <Stack.Screen name={"Main"} component={BottomTabs} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserContextProvider>
-
-  )
+  );
 }
