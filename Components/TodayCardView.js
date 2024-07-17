@@ -4,7 +4,7 @@ import CircularButton from "./CircularButton";
 import {LinearGradient} from "expo-linear-gradient";
 import {Colors} from "../assets/colors/colors";
 
-export default function CardView(){
+export default function TodayCardView(){
     return(
         //vertical view
         <LinearGradient

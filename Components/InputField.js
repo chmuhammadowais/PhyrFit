@@ -2,7 +2,7 @@ import React from 'react';
 import { TextInput } from 'react-native';
 import Styles from '../assets/Styles';
 
-export default function InputField({ placeholder, autoCapitalize, secureTextEntry, keyboardType, width, height, inputMode, setText}) {
+export default function InputField({ placeholder, autoCapitalize, secureTextEntry, keyboardType, width, height, inputMode, setText, text}) {
     return (
         <TextInput
             style={[
@@ -15,6 +15,7 @@ export default function InputField({ placeholder, autoCapitalize, secureTextEntr
             keyboardType={keyboardType}
             inputMode={inputMode ? inputMode : ''}
             onChangeText={text => setText(text)}
+            value={text}
         />
     );
 }

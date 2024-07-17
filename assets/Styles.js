@@ -94,12 +94,13 @@ const Styles = StyleSheet.create({
     cardViewContainer: {
         flexDirection: "column",
         width: '100%',
-        justifyContent: "flex-start",
+        justifyContent: "center",
         alignItems: "center",
         borderRadius: 10,
         paddingTop: 10,
         paddingBottom: 10,
-        gap: 20
+        gap: 20,
+        marginBottom: 10
     },
     cardViewHeading: {
         fontSize: 20,
@@ -136,7 +137,36 @@ const Styles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 10,
         alignSelf: "center"
-    }
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalView: {
+        width: 300,
+        padding: 20,
+        backgroundColor: Colors.FilledCircleDark,
+        borderRadius: 10,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center",
+        fontSize: 20,
+        color: Colors.PrimaryColorFg,
+        fontFamily: "roboto_bold"
+    },
 });
 
 export default Styles;

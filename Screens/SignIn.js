@@ -34,10 +34,10 @@ export default function SignIn({ navigation }) {
                     target: 'Weight Loss'
                 });
                 navigation.navigate('Home');
-                // navigation.reset({
-                //     index: 0,
-                //     routes: [{ name: 'Home' }]
-                // });
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Home' }]
+                });
             }
         }
     }
