@@ -18,9 +18,11 @@ const Styles = StyleSheet.create({
     },
     sub_container_b: {
         width: '100%',
-        flex: 3,
-        justifyContent: "flex-start",
-        padding: 10
+        flex: 2.7,
+        justifyContent: "center",
+        padding: 10,
+        marginBottom: 30
+
     },
     sub_container_c: {
         width: '95%',
@@ -35,13 +37,13 @@ const Styles = StyleSheet.create({
     },
     scrollContainer: {
         width: "auto",
-        flexGrow: 1,
         justifyContent: "flex-start",
         alignItems: "center",
     },
     loading_text: {
         color: Colors.PrimaryColorFg,
-        fontSize: 20
+        fontSize: 20,
+        textAlign: "center"
     },
     logo: {
         width: 125,

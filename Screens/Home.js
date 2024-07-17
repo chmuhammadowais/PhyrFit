@@ -1,6 +1,5 @@
 import {ScrollView, Text, View} from "react-native";
 import Styles from "../assets/Styles";
-import InputField from "../Components/InputField";
 import CardView from "../Components/CardView";
 import React from "react";
 

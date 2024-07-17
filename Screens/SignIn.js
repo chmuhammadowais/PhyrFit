@@ -53,7 +53,7 @@ export default function SignIn({ navigation }) {
                 <Image style={Styles.logo} source={require('../assets/icons/app-logo.png')} />
             </View>
             <KeyboardAvoidingView
-                style={Styles.sub_container_b}
+                style={[Styles.sub_container_b, {justifyContent:"flex-start"}]}
                 behavior={Platform.OS === 'ios' ? 'padding' : null}
                 keyboardVerticalOffset={30}>
                 <Text style={Styles.form_heading}>SignIn</Text>
