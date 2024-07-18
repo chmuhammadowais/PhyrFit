@@ -1,29 +1,78 @@
-import {ScrollView, Text, View} from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import Styles from "../assets/Styles";
-import React from "react";
-import CircularButton from "../Components/CircularButton";
-import {Colors} from "../assets/colors/colors";
+import React, { useState } from "react";
 import BasicCardView from "../Components/BasicCardView";
+import Button from "../Components/Button";
+import InputDialogBoxTimer from "../Components/InputDialogBoxTimer";
 
-export default function Reminders(){
-    return(
-        <View style={Styles.container}>
-            <View style={Styles.sub_container_c}>
-                <Text style={Styles.form_heading}>Reminders</Text>
-            </View>
-            <View style={Styles.sub_container_b}>
-                <ScrollView contentContainerStyle={[Styles.scrollContainer, {marginTop: 20}]}>
-                    <BasicCardView
-                        heading={"Workout"}
-                        subText_a={"Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
-                        subText_b={"Reminder: 12:00 am"}
-                        iconPath_major={require("../assets/icons/notification-bell.png")}
-                        iconPath_a={require('../assets/icons/check.png')}
-                        iconPath_b={require('../assets/icons/bin.png')}/>
+export default function Reminders() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [reminderHeading, setReminderHeading] = useState("");
+  const [reminderDescription, setReminderDescription] = useState("");
+  const [time, setTime] = useState(new Date());
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [reminders, setReminders] = useState([
+    {
+      heading: "Workout",
+      description: "Hit the gym man",
+      time: "12:00 am",
+    },
+  ]);
+  const handleSave = () => {
+    const newReminder = {
+      heading: reminderHeading,
+      description: reminderDescription,
+      time: time.toLocaleTimeString(),
+    };
+    setReminders([...reminders, newReminder]);
+    setModalVisible(false);
+    resetForm();
+  };
 
-                    <CircularButton source={require("../assets/icons/add reminder.png")} imageStyle={{width: 40, height: 40}} containerStyle={{alignSelf: "center", backgroundColor: Colors.ButtonColor, width: 60, height: 60, justifyContent: "center",alignItems: "center", borderRadius:50, marginBottom: 30, marginTop: 10}}/>
-                </ScrollView>
-            </View>
-        </View>
-    )
+  const resetForm = () => {
+    setReminderHeading("");
+    setReminderDescription("");
+    setTime(new Date());
+  };
+  return (
+    <View style={Styles.container}>
+      <View style={Styles.sub_container_c}>
+        <Text style={Styles.form_heading}>Reminders</Text>
+      </View>
+      <View style={Styles.sub_container_b}>
+        <ScrollView
+          contentContainerStyle={[Styles.scrollContainer, { marginTop: 20 }]}
+        >
+          {reminders.map((item, index) => (
+            <BasicCardView
+              key={index} // Add a key to each element in the map
+              heading={item.heading}
+              subText_a={item.description}
+              subText_b={item.time}
+              iconPath_major={require("../assets/icons/notification-bell.png")}
+              iconPath_a={require("../assets/icons/check.png")}
+              iconPath_b={require("../assets/icons/bin.png")}
+            />
+          ))}
+          <Button text={"Open Modal"} onPress={() => setModalVisible(true)} />
+        </ScrollView>
+      </View>
+
+      <InputDialogBoxTimer
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        reminderHeading={reminderHeading}
+        setReminderHeading={setReminderHeading}
+        reminderDescription={reminderDescription}
+        setReminderDescription={setReminderDescription}
+        time={time}
+        setTime={setTime}
+        showTimePicker={showTimePicker}
+        setShowTimePicker={setShowTimePicker}
+        setReminders={setReminders}
+        handleSave={handleSave}
+        resetForm={resetForm}
+      />
+    </View>
+  );
 }
