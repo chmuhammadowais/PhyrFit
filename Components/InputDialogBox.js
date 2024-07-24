@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Modal } from "react-native";
+import {View, Text, Modal, KeyboardAvoidingView, Platform} from "react-native";
 import Button from "../Components/Button";
 import InputField from "./InputField";
 import Styles from "../assets/Styles";
@@ -23,9 +23,12 @@ export default function InputDialogBox({
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <View style={Styles.modalOverlay}>
+      <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : null}
+          keyboardVerticalOffset={30}
+          style={Styles.centeredView}>
         <View style={Styles.modalView}>
-          <Text style={Styles.modalText}>Enter your text:</Text>
+          <Text style={[Styles.cardViewHeading, {marginBottom: 30}]}>Enter your text:</Text>
           <InputField setText={setInputText} text={inputText} />
           <View style={Styles.sub_container_horizontal}>
             <Button
@@ -40,7 +43,7 @@ export default function InputDialogBox({
             />
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, Modal } from "react-native";
+import React from "react";
+import {View, Text, Modal, KeyboardAvoidingView, Platform} from "react-native";
 import Button from "../Components/Button";
 import InputField from "./InputField";
 import Styles from "../assets/Styles";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Reminders from "../Screens/Reminders";
 
 export default function InputDialogBoxTimer({
   reminderHeading,
@@ -33,7 +32,10 @@ export default function InputDialogBoxTimer({
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <View style={Styles.centeredView}>
+      <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : null}
+          keyboardVerticalOffset={30}
+          style={Styles.centeredView}>
         <View style={Styles.modalView}>
           <Text style={[Styles.cardViewHeading, { marginBottom: 20 }]}>
             Add Reminder
@@ -83,7 +85,7 @@ export default function InputDialogBoxTimer({
             />
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
