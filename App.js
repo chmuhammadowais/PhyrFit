@@ -11,6 +11,8 @@ import Home from "./Screens/Home";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {Colors} from "./assets/colors/colors";
 import Reminders from "./Screens/Reminders";
+import Workouts from "./Screens/Workouts";
+import Profile from "./Screens/Profile";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -44,10 +46,11 @@ export default function App() {
               name="Home"
               component={Home}
               options={{
-                tabBarIcon: ({ color, size }) => (
+                  tabBarShowLabel: false,
+                tabBarIcon: ({size, focused }) => (
                     <Image
                         source={require('./assets/icons/home-white.png')}
-                        style={{ width: size, height: size, tintColor: Colors.PrimaryColorFg }}
+                        style={{width: focused ? 35 : size+5, height: focused ? 35 : size+5, tintColor: focused ? Colors.PrimaryColorFg : Colors.FilledCircleDark}}
                     />
                 ),
               }}
@@ -56,14 +59,41 @@ export default function App() {
               name="Reminders"
               component={Reminders}
               options={{
-                tabBarIcon: ({ color, size }) => (
+                  tabBarShowLabel: false,
+                tabBarIcon: ({size, focused }) => (
                     <Image
                         source={require('./assets/icons/reminder-white.png')}
-                        style={{ width: size, height: size, tintColor: Colors.PrimaryColorFg }}
+                        style={{width: focused ? 30 : size, height: focused ? 30 : size, tintColor: focused ? Colors.PrimaryColorFg : Colors.FilledCircleDark}}
                     />
                 ),
               }}
           />
+            <Tab.Screen
+                name="Workouts"
+                component={Workouts}
+                options={{
+                    tabBarShowLabel: false,
+                    tabBarIcon: ({ size, focused }) => (
+                        <Image
+                            source={require('./assets/icons/dumbell-white.png')}
+                            style={{ width: focused ? 30 : size, height: focused ? 30 : size, tintColor: focused ? Colors.PrimaryColorFg : Colors.FilledCircleDark }}
+                        />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Profile"
+                component={Profile}
+                options={{
+                    tabBarShowLabel: false,
+                    tabBarIcon: ({ size, focused }) => (
+                        <Image
+                            source={require('./assets/icons/account-white.png')}
+                            style={{ width: focused ? 32 : size, height: focused ? 32 : size + 2, tintColor: focused ? Colors.PrimaryColorFg : Colors.FilledCircleDark }}
+                        />
+                    ),
+                }}
+            />
         </Tab.Navigator>
     );
   }

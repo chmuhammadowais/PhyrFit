@@ -8,7 +8,7 @@ export const UserContext = createContext({
         age: "",
         height: "",
         weight: "",
-        target: ""
+        goal: ""
     },
     addUser: (userData) => {},
     removeUser: () => {}
@@ -22,7 +22,7 @@ export default function UserContextProvider({ children }) {
         age: "",
         height: "",
         weight: "",
-        target: ""
+        goal: ""
     });
 
     function addUser(userData) {
@@ -37,7 +37,7 @@ export default function UserContextProvider({ children }) {
             age: "",
             height: "",
             weight: "",
-            target: ""
+            goal: ""
         });
     }
 

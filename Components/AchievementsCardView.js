@@ -18,10 +18,10 @@ export default function AchievementsCardView() {
                 <Image style={Styles.iconSmall} source={require("../assets/icons/trophy.png")} />
             </View>
 
-            <Text style={Styles.cardViewText}>Weekly Progress</Text>
+            <Text style={[Styles.cardViewText, {marginBottom: 5}]}>Weekly Progress</Text>
             <ProgressBar fillPercentage={50}/>
             {/*Horizontal view*/}
-            <View style={[Styles.sub_container_horizontal, {width: '95%'}]}>
+            <View style={[Styles.sub_container_horizontal, {width: '95%', marginTop: 5}]}>
                 <View>
                     <Text style={Styles.cardViewText}>Total Workout Days: </Text>
                     <Text style={Styles.cardViewText}>Completed Workout Days: </Text>

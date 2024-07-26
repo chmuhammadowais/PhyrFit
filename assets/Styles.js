@@ -98,7 +98,7 @@ const Styles = StyleSheet.create({
     borderRadius: 10,
     paddingTop: 10,
     paddingBottom: 10,
-    gap: 20,
+    gap: 10,
     marginBottom: 10,
   },
   cardViewHeading: {
