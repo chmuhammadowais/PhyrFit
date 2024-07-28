@@ -107,12 +107,17 @@ const Styles = StyleSheet.create({
     color: Colors.PrimaryColorFg,
   },
   cardViewText: {
-    fontFamily: "roboto_regular",
+    fontFamily: "roboto_light",
     color: Colors.PrimaryColorFg,
   },
   iconSmall: {
     width: 30,
     height: 30,
+  },
+  iconLarge:{
+    width: 70,
+    height: 70,
+    resizeMode: "contain"
   },
   pickerContainer: {
     width: "100%",
