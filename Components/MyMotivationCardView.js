@@ -3,7 +3,7 @@ import { Colors } from "../assets/colors/colors";
 import Styles from "../assets/Styles";
 import { Image, Pressable, Text, View } from "react-native";
 import { useState } from "react";
-import InputDialogBox from "./InputDialogBox";
+import AddMotivationModal from "./AddMotivationModal";
 
 export default function MyMotivationCardView() {
     const [motivationText, setMotivationText] = useState("");
@@ -25,7 +25,7 @@ export default function MyMotivationCardView() {
                         {motivationText ? motivationText : "Click to add your motivation."}
                     </Text>
                 </Pressable>
-            <InputDialogBox
+            <AddMotivationModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
                 setSavedText={setMotivationText}

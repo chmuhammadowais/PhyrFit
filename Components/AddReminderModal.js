@@ -5,7 +5,7 @@ import InputField from "./InputField";
 import Styles from "../assets/Styles";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-export default function InputDialogBoxTimer({
+export default function AddReminderModal({
   reminderHeading,
   reminderDescription,
   setReminderHeading,

@@ -130,8 +130,6 @@ const Styles = StyleSheet.create({
   pickerStyle: {
     width: "105%",
     color: "#787878",
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-    borderRadius: 10,
   },
   errorText: {
     width: "90%",

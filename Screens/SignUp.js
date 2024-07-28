@@ -12,14 +12,8 @@ export default function SignUp() {
     const [height, setHeight] = useState("");
     const [weight, setWeight] = useState("");
     const [age, setAge] = useState("");
-    // const [selectedItem, setSelectedItem] = useState(null);
     const [error, setError] = useState("");
     const [isKeyboardAvailable, setKeyboardAvailable] = useState(false);
-    // const items = [
-    //     { label: "Loose Weight", value: "Loose Weight" },
-    //     { label: "Gain Weight", value: "Gain Weight" },
-    //     { label: "Build Muscle", value: "Build Muscle" }
-    // ];
 
     function handleSignup() {
         console.log(fullName, email, password, phone, age, height, weight, selectedItem);

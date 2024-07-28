@@ -4,7 +4,7 @@ import Button from "../Components/Button";
 import InputField from "./InputField";
 import Styles from "../assets/Styles";
 
-export default function InputDialogBox({
+export default function AddMotivationMoa({
   modalVisible,
   setModalVisible,
   setSavedText,

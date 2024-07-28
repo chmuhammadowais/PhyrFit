@@ -3,7 +3,7 @@ import Styles from "../assets/Styles";
 import React, { useState } from "react";
 import BasicCardView from "../Components/BasicCardView";
 import Button from "../Components/Button";
-import InputDialogBoxTimer from "../Components/InputDialogBoxTimer";
+import AddReminderModal from "../Components/AddReminderModal";
 
 export default function Reminders() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -58,7 +58,7 @@ export default function Reminders() {
         </ScrollView>
       </View>
 
-      <InputDialogBoxTimer
+      <AddReminderModal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         reminderHeading={reminderHeading}
