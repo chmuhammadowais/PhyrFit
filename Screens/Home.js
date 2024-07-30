@@ -26,7 +26,7 @@ export default function Home(){
                         iconPath_a={require('../assets/icons/complete.png')}
                         iconPath_b={require('../assets/icons/incomplete.png')}/>
                     <AchievementsCardView/>
-                    <QuoteCardView text={"Hello World"} />
+                    <QuoteCardView />
                     <MyMotivationCardView />
                 </ScrollView>
             </View>
