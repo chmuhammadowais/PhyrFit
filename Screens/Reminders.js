@@ -54,7 +54,7 @@ export default function Reminders() {
               iconPath_b={require("../assets/icons/bin.png")}
             />
           ))}
-          <Button text={"Open Modal"} onPress={() => setModalVisible(true)} />
+          <Button text={"Add Reminder"} onPress={() => setModalVisible(true)} />
         </ScrollView>
       </View>
 

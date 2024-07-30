@@ -1,6 +1,6 @@
 import { Alert, ScrollView, Text, View } from "react-native";
 import Styles from "../assets/Styles";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import WorkoutCardView from "../Components/WorkoutCardView";
 import Button from "../Components/Button";
 import AddWorkoutModal from "../Components/AddWorkoutModal";
@@ -26,17 +26,29 @@ export default function Workouts() {
         { label: "Sunday", value: "sunday" }
     ];
 
+    const initialExercises = [
+        { label: "Push-ups", isChecked: false },
+        { label: "Burpees", isChecked: false },
+        { label: "Planks", isChecked: false },
+        { label: "Mountain Climbers", isChecked: false },
+        { label: "Leg Raises", isChecked: false }
+    ];
+
     const [trainingDayName, setTrainingDayName] = useState("");
     const [setCount, setSetCount] = useState("");
     const [repCount, setRepCount] = useState("");
     const [selectedItem, setSelectedItem] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
+    const [exercises, setExercises] = useState(initialExercises);
     const [editIndex, setEditIndex] = useState(null); // New state to keep track of editing index
+
+    useEffect(() => {
+        console.log("Exercises updated:", exercises);
+    }, [exercises]);
 
     function handleSave() {
         if (trainingDayName === "" || selectedItem === "") {
             Alert.alert("Error", "Workout name and day cannot be empty.");
-            clearForm();
             return;
         }
 
@@ -49,16 +61,17 @@ export default function Workouts() {
 
         if (duplicateCheck) {
             Alert.alert("Error", "Duplicate workout detected.");
-            clearForm();
             return;
         }
+
+        const selectedExercises = exercises.filter(exercise => exercise.isChecked);
 
         const newWorkout = {
             name: trainingDayName,
             day: selectedItem,
             setCount: setCount,
             repCount: repCount,
-            exercises: []
+            exercises: selectedExercises
         };
 
         if (editIndex !== null) {
@@ -78,6 +91,7 @@ export default function Workouts() {
         setSetCount("");
         setRepCount("");
         setSelectedItem("");
+        setExercises(initialExercises.map(exercise => ({ ...exercise, isChecked: false })));
         setEditIndex(null); // Clear edit index
     }
 
@@ -87,16 +101,22 @@ export default function Workouts() {
         setSetCount(item.setCount);
         setRepCount(item.repCount);
         setSelectedItem(item.day);
+        setExercises(initialExercises.map(exercise => ({
+            ...exercise,
+            isChecked: item.exercises.some(ex => ex.label === exercise.label)
+        })));
         setEditIndex(index);
     }
 
     function handleDelete(item) {
         setUserWorkouts(userWorkouts.filter(workout => workout.name !== item.name));
     }
-    function addWorkout(){
+
+    function addWorkout() {
         clearForm();
         setModalVisible(true);
     }
+
     return (
         <View style={Styles.container}>
             <View style={Styles.sub_container_c}>
@@ -130,6 +150,8 @@ export default function Workouts() {
                         setSelectedItem={setSelectedItem}
                         modalVisible={modalVisible}
                         setModalVisible={setModalVisible}
+                        exercises={exercises}
+                        setExercises={setExercises}
                         handleSave={handleSave}
                     />
                 </ScrollView>
