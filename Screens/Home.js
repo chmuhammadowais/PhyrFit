@@ -8,7 +8,7 @@ import MyMotivationCardView from "../Components/MyMotivationCardView";
 
 export default function Home(){
     const [todayFocus, setTodayFocus] = useState(null);
-    console.log(todayFocus)
+
     return(
         <View style={Styles.container}>
           <View style={Styles.sub_container_c}>

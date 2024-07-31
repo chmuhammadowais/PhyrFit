@@ -11,20 +11,7 @@ export default function Reminders() {
   const [reminderDescription, setReminderDescription] = useState("");
   const [time, setTime] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [reminders, setReminders] = useState([
-    {
-      heading: "Workout 1",
-      description: "Hit the gym man",
-      time: "12:00 am",
-      isCompleted: false
-    },
-    {
-      heading: "Workout 2",
-      description: "Hit the gym man",
-      time: "12:00 am",
-      isCompleted: false
-    },
-  ]);
+  const [reminders, setReminders] = useState([]);
   const handleCompletion = (heading) => {
     setReminders((prevReminders) =>
         prevReminders.map((reminder) =>
@@ -64,20 +51,24 @@ export default function Reminders() {
         <ScrollView
           contentContainerStyle={[Styles.scrollContainer, { marginTop: 20 }]}
         >
-          {reminders.map((item, index) => (
-              !item.isCompleted &&
-            <ReminderCardView
-              key={index} // Add a key to each element in the map
-              heading={item.heading}
-              subText_a={item.description}
-              subText_b={item.time}
-              onComplete={() => handleCompletion(item.heading)}
-              onDelete={() => handleDeletion(item.heading)}
-              iconPath_major={require("../assets/icons/notification-bell.png")}
-              iconPath_a={require("../assets/icons/check.png")}
-              iconPath_b={require("../assets/icons/bin.png")}
-            />
-          ))}
+          {
+            reminders.length > 0 ?
+                reminders.map((item, index) => (
+                    !item.isCompleted &&
+                    <ReminderCardView
+                        key={index} // Add a key to each element in the map
+                        heading={item.heading}
+                        subText_a={item.description}
+                        subText_b={item.time}
+                        onComplete={() => handleCompletion(item.heading)}
+                        onDelete={() => handleDeletion(item.heading)}
+                        iconPath_major={require("../assets/icons/notification-bell.png")}
+                        iconPath_a={require("../assets/icons/check.png")}
+                        iconPath_b={require("../assets/icons/bin.png")}
+                    />
+                )) : <Text style={Styles.loading_text}>No Reminders</Text>
+          }
+
           <Button text={"Add Reminder"} onPress={() => setModalVisible(true)} />
         </ScrollView>
       </View>

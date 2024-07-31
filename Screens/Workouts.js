@@ -1,22 +1,14 @@
 import { Alert, ScrollView, Text, View } from "react-native";
 import Styles from "../assets/Styles";
-import React, { useEffect, useState } from "react";
+import React, {useState } from "react";
 import WorkoutCardView from "../Components/WorkoutCardView";
 import Button from "../Components/Button";
 import AddWorkoutModal from "../Components/AddWorkoutModal";
 
 export default function Workouts() {
-    const [userWorkouts, setUserWorkouts] = useState([
-        {
-            name: "Shoulder day",
-            day: "Wednesday",
-            setCount: "3",
-            repCount: "12",
-            exercises: []
-        }
-    ]);
+    const [userWorkouts, setUserWorkouts] = useState([]);
 
-    const items = [
+    const days = [
         { label: "Monday", value: "monday" },
         { label: "Tuesday", value: "tuesday" },
         { label: "Wednesday", value: "wednesday" },
@@ -41,10 +33,6 @@ export default function Workouts() {
     const [modalVisible, setModalVisible] = useState(false);
     const [exercises, setExercises] = useState(initialExercises);
     const [editIndex, setEditIndex] = useState(null); // New state to keep track of editing index
-
-    useEffect(() => {
-        console.log("Exercises updated:", exercises);
-    }, [exercises]);
 
     function handleSave() {
         if (trainingDayName === "" || selectedItem === "") {
@@ -125,6 +113,7 @@ export default function Workouts() {
             <View style={Styles.sub_container_b}>
                 <ScrollView contentContainerStyle={[Styles.scrollContainer, { marginTop: 20 }]}>
                     {
+                        userWorkouts.length > 0 ?
                         userWorkouts.map((item, index) => (
                             <WorkoutCardView
                                 key={item.name + item.day}
@@ -135,7 +124,7 @@ export default function Workouts() {
                                 handleEdit={() => handleEdit(item, index)}
                                 handleDelete={() => handleDelete(item)}
                             />
-                        ))
+                        )) : <Text style={Styles.loading_text}>No Workouts</Text>
                     }
                     <Button text={"Add Workout"} customStyle={{ marginBottom: 30 }} onPress={addWorkout} />
                     <AddWorkoutModal
@@ -145,7 +134,7 @@ export default function Workouts() {
                         setSetCount={setSetCount}
                         repCount={repCount}
                         setRepCount={setRepCount}
-                        items={items}
+                        items={days}
                         selectedItem={selectedItem}
                         setSelectedItem={setSelectedItem}
                         modalVisible={modalVisible}
