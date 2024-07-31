@@ -1,9 +1,9 @@
 import { ScrollView, Text, View } from "react-native";
 import Styles from "../assets/Styles";
 import React, { useState } from "react";
-import BasicCardView from "../Components/BasicCardView";
 import Button from "../Components/Button";
 import AddReminderModal from "../Components/AddReminderModal";
+import ReminderCardView from "../Components/ReminderCardView";
 
 export default function Reminders() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -13,11 +13,32 @@ export default function Reminders() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [reminders, setReminders] = useState([
     {
-      heading: "Workout",
+      heading: "Workout 1",
       description: "Hit the gym man",
       time: "12:00 am",
+      isCompleted: false
+    },
+    {
+      heading: "Workout 2",
+      description: "Hit the gym man",
+      time: "12:00 am",
+      isCompleted: false
     },
   ]);
+  const handleCompletion = (heading) => {
+    setReminders((prevReminders) =>
+        prevReminders.map((reminder) =>
+            reminder.heading === heading
+                ? { ...reminder, isCompleted: true }
+                : reminder
+        )
+    );
+  };
+  const handleDeletion = (heading) => {
+    setReminders(prevReminder =>
+    prevReminder.filter(item => heading !== item.heading)
+    )
+  }
   const handleSave = () => {
     const newReminder = {
       heading: reminderHeading,
@@ -44,11 +65,14 @@ export default function Reminders() {
           contentContainerStyle={[Styles.scrollContainer, { marginTop: 20 }]}
         >
           {reminders.map((item, index) => (
-            <BasicCardView
+              !item.isCompleted &&
+            <ReminderCardView
               key={index} // Add a key to each element in the map
               heading={item.heading}
               subText_a={item.description}
               subText_b={item.time}
+              onComplete={() => handleCompletion(item.heading)}
+              onDelete={() => handleDeletion(item.heading)}
               iconPath_major={require("../assets/icons/notification-bell.png")}
               iconPath_a={require("../assets/icons/check.png")}
               iconPath_b={require("../assets/icons/bin.png")}
