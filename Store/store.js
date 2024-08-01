@@ -1,4 +1,5 @@
 import React, { createContext, useState } from 'react';
+import { Alert } from "react-native";
 
 export const UserContext = createContext({
     user: {
@@ -11,7 +12,10 @@ export const UserContext = createContext({
         goal: ""
     },
     addUser: (userData) => {},
-    removeUser: () => {}
+    removeUser: () => {},
+    handleSave: (workoutData, editIndex) => {},
+    handleWorkoutCompletion: (day) => {},
+    handleWorkoutIncompletion: (day) => {},
 });
 
 export default function UserContextProvider({ children }) {
@@ -24,27 +28,85 @@ export default function UserContextProvider({ children }) {
         weight: "",
         goal: ""
     });
+    const [userWorkouts, setUserWorkouts] = useState([]);
 
-    function addUser(userData) {
-        setUser(userData);
-    }
+    const addUser = (userData) => setUser(userData);
 
-    function removeUser() {
-        setUser({
-            name: "",
-            email: "",
-            phone: "",
-            age: "",
-            height: "",
-            weight: "",
-            goal: ""
-        });
-    }
+    const removeUser = () => setUser({
+        name: "",
+        email: "",
+        phone: "",
+        age: "",
+        height: "",
+        weight: "",
+        goal: ""
+    });
+
+    const handleSave = (workoutData, editIndex) => {
+        const { trainingDayName, selectedItem, exercises, repCount, setCount } = workoutData;
+
+        if (trainingDayName === "" || selectedItem === "") {
+            Alert.alert("Error", "Workout name and day cannot be empty.");
+            return;
+        }
+
+        const duplicateCheck = userWorkouts.some(
+            (item, index) =>
+                item.name === trainingDayName &&
+                item.day === selectedItem &&
+                index !== editIndex
+        );
+
+        if (duplicateCheck) {
+            Alert.alert("Error", "Duplicate workout detected.");
+            return;
+        }
+
+        const selectedExercises = exercises.filter(exercise => exercise.isChecked);
+
+        const newWorkout = {
+            name: trainingDayName,
+            day: selectedItem,
+            setCount,
+            repCount,
+            exercises: selectedExercises,
+            isCompleted: null // Initialize as not completed
+        };
+
+        if (editIndex !== null) {
+            const updatedWorkouts = [...userWorkouts];
+            updatedWorkouts[editIndex] = newWorkout;
+            setUserWorkouts(updatedWorkouts);
+        } else {
+            setUserWorkouts([...userWorkouts, newWorkout]);
+        }
+    };
+
+    const handleWorkoutCompletion = (day) => {
+        setUserWorkouts(prevWorkouts =>
+            prevWorkouts.map(workout =>
+                workout.day === day ? { ...workout, isCompleted: true } : workout
+            )
+        );
+    };
+
+    const handleWorkoutIncompletion = (day) => {
+        setUserWorkouts(prevWorkouts =>
+            prevWorkouts.map(workout =>
+                workout.day === day ? { ...workout, isCompleted: false } : workout
+            )
+        );
+    };
 
     const value = {
         user,
         addUser,
         removeUser,
+        userWorkouts,
+        handleSave,
+        handleWorkoutCompletion,
+        handleWorkoutIncompletion,
+        setUserWorkouts
     };
 
     return (

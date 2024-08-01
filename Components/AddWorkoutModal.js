@@ -1,41 +1,88 @@
-import { KeyboardAvoidingView, Modal, Platform, Text, View } from "react-native";
-import React, { useState } from "react";
+import {KeyboardAvoidingView, Modal, Platform, Text, View} from "react-native";
+import React, {useEffect, useState} from "react";
 import Styles from "../assets/Styles";
 import Button from "./Button";
 import InputField from "./InputField";
 import OptionsPicker from "./OptionsPicker";
 import AddExerciseModal from "./AddExerciseModal";
 
+const initialExercises = [
+    { label: "Push-ups", isChecked: false },
+    { label: "Burpees", isChecked: false },
+    { label: "Planks", isChecked: false },
+    { label: "Mountain Climbers", isChecked: false },
+    { label: "Leg Raises", isChecked: false }
+];
+
+const days = [
+    { label: "Monday", value: 1 },
+    { label: "Tuesday", value: 2 },
+    { label: "Wednesday", value: 3 },
+    { label: "Thursday", value: 4 },
+    { label: "Friday", value: 5 },
+    { label: "Saturday", value: 6 },
+    { label: "Sunday", value: 0 }
+];
+
 export default function AddWorkoutModal({
-                                            trainingDayName,
-                                            setTrainingDayName,
-                                            setCount,
-                                            setSetCount,
-                                            repCount,
-                                            setRepCount,
-                                            items,
-                                            selectedItem,
-                                            setSelectedItem,
-                                            exercises,
-                                            setExercises,
                                             modalVisible,
                                             setModalVisible,
-                                            handleSave
+                                            editIndex,
+                                            handleSave,
+                                            initialWorkout
                                         }) {
+    const [trainingDayName, setTrainingDayName] = useState("");
+    const [setCount, setSetCount] = useState("");
+    const [repCount, setRepCount] = useState("");
+    const [selectedItem, setSelectedItem] = useState("");
+    const [exercises, setExercises] = useState(initialExercises);
     const [modalVisibleEx, setModalVisibleEx] = useState(false);
 
-    function toggleExerciseChecked(index) {
+    useEffect(() => {
+        if (initialWorkout) {
+            setTrainingDayName(initialWorkout.name);
+            setSetCount(initialWorkout.setCount);
+            setRepCount(initialWorkout.repCount);
+            setSelectedItem(initialWorkout.day);
+            setExercises(initialExercises.map(exercise => ({
+                ...exercise,
+                isChecked: initialWorkout.exercises.some(ex => ex.label === exercise.label)
+            })));
+        } else {
+            clearForm();
+        }
+    }, [initialWorkout]);
+
+    const toggleExerciseChecked = (index) => {
         setExercises(prevExercises => {
-            const newExercises = prevExercises.map((exercise, i) => {
+            return prevExercises.map((exercise, i) => {
                 if (i === index) {
-                    return { ...exercise, isChecked: !exercise.isChecked };
+                    return {...exercise, isChecked: !exercise.isChecked};
                 }
                 return exercise;
             });
-            console.log("Updated Exercises:", newExercises);
-            return newExercises;
         });
-    }
+    };
+
+    const clearForm = () => {
+        setTrainingDayName("");
+        setSetCount("");
+        setRepCount("");
+        setSelectedItem("");
+        setExercises(initialExercises.map(exercise => ({ ...exercise, isChecked: false })));
+    };
+
+    const saveWorkout = () => {
+        handleSave({
+            trainingDayName,
+            selectedItem,
+            exercises,
+            repCount,
+            setCount
+        }, editIndex);
+        setModalVisible(false);
+        clearForm();
+    };
 
     return (
         <Modal
@@ -54,28 +101,20 @@ export default function AddWorkoutModal({
                         <InputField placeholder={'Sets'} secureTextEntry={false} keyboardType={'number'} width={'48%'} text={setCount} setText={setSetCount} />
                         <InputField placeholder={'Reps'} secureTextEntry={false} keyboardType={'number'} width={'48%'} text={repCount} setText={setRepCount} />
                     </View>
-                    <OptionsPicker items={items} selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
-                    <Button text={"Add Exercises"} onPress={() => setModalVisibleEx(true)} />
-                    <View style={Styles.sub_container_horizontal}>
-                        <Button
-                            text="Save"
-                            onPress={() => handleSave()}
-                            customStyle={{ width: "40%" }}
-                        />
-                        <Button
-                            text="Cancel"
-                            onPress={() => setModalVisible(false)}
-                            customStyle={{ width: "40%" }}
-                        />
+                    <OptionsPicker items={days} selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
+                    <Button text={"Select Exercises"} customStyle={{ marginVertical: 10 }} onPress={() => setModalVisibleEx(true)} />
+                    <AddExerciseModal
+                        modalVisible={modalVisibleEx}
+                        setModalVisible={setModalVisibleEx}
+                        exercises={exercises}
+                        toggleExerciseChecked={toggleExerciseChecked}
+                    />
+                    <View style={[Styles.sub_container_horizontal, {justifyContent: "center", gap: 5}]}>
+                        <Button text={"Save Workout"} onPress={saveWorkout} customStyle={{width: '55%'}}/>
+                        <Button text={"Cancel"} onPress={() => setModalVisible(false)} customStyle={{width: '55%'}}/>
                     </View>
                 </View>
             </KeyboardAvoidingView>
-            <AddExerciseModal
-                modalVisible={modalVisibleEx}
-                setModalVisible={setModalVisibleEx}
-                exercises={exercises}
-                toggleExerciseChecked={toggleExerciseChecked}
-            />
         </Modal>
-    )
+    );
 }
