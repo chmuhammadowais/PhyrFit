@@ -13,6 +13,11 @@ export default function Home() {
     const today = new Date().getDay(); // Get today's day as a number (0 for Sunday, 1 for Monday, etc.)
     const [todayFocus, setTodayFocus] = useState([]);
     const [tempIsCompleted, setTempIsCompleted] = useState(null);
+    const totalWorkoutDays = userWorkouts.length;
+    const completedWorkoutDays = userWorkouts.filter(item => item.isCompleted === true)
+
+    console.log(totalWorkoutDays)
+    console.log(completedWorkoutDays.length)
 
     useEffect(() => {
         const todayWorkouts = userWorkouts.filter(item => item.day === today);
@@ -48,7 +53,7 @@ export default function Home() {
                         iconPath_a={require('../assets/icons/complete.png')}
                         iconPath_b={require('../assets/icons/incomplete.png')}
                     />
-                    <AchievementsCardView />
+                    <AchievementsCardView totalWorkoutDays={totalWorkoutDays} completedWorkoutDays={completedWorkoutDays.length}/>
                     <QuoteCardView />
                     <MyMotivationCardView />
                 </ScrollView>
