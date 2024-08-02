@@ -1,4 +1,4 @@
-import {Image, Text, View} from "react-native";
+import {ActivityIndicator, Image, Text, View} from "react-native";
 import Styles from "../assets/Styles";
 import {LinearGradient} from "expo-linear-gradient";
 import {Colors} from "../assets/colors/colors";
@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 
 export default function QuoteCardView(){
     const [quote, setQuote] = useState("");
+
     useEffect(() => {
         async function api_call() {
             const res = await fetch(`https://api.api-ninjas.com/v1/quotes?category=fitness`, {
@@ -38,7 +39,10 @@ export default function QuoteCardView(){
             {/*Horizontal view*/}
             <View style={[Styles.sub_container_horizontal, {width: '95%'}]}>
                 <View>
-                    <Text style={Styles.cardViewText}>{quote ? quote : "Error loading the quote."}</Text>
+                    {
+                        !quote ? <ActivityIndicator size="small" color="#fff" /> :
+                            <Text style={Styles.cardViewText}>{quote ? quote : "Error loading the quote."}</Text>
+                    }
                 </View>
             </View>
         </LinearGradient>
