@@ -90,6 +90,13 @@ const Styles = StyleSheet.create({
     color: Colors.PrimaryColorFg,
     fontSize: 20,
   },
+  logoutButtonContainer:{
+    width: 30,
+    height: 30,
+    position: "absolute",
+    left: '92%',
+    bottom: '5%',
+  },
   cardViewContainer: {
     flexDirection: "column",
     width: "100%",

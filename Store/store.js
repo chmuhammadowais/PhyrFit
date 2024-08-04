@@ -13,6 +13,7 @@ export const UserContext = createContext({
     },
     addUser: (userData) => {},
     removeUser: () => {},
+    resetData: () => {},  // Add this line
     handleSave: (workoutData, editIndex) => {},
     handleWorkoutCompletion: (day) => {},
     handleWorkoutIncompletion: (day) => {},
@@ -41,6 +42,19 @@ export default function UserContextProvider({ children }) {
         weight: "",
         goal: ""
     });
+
+    const resetData = () => {
+        setUser({
+            name: "",
+            email: "",
+            phone: "",
+            age: "",
+            height: "",
+            weight: "",
+            goal: ""
+        });
+        setUserWorkouts([]);
+    };
 
     const handleSave = (workoutData, editIndex) => {
         const { trainingDayName, selectedItem, exercises, repCount, setCount } = workoutData;
@@ -102,6 +116,7 @@ export default function UserContextProvider({ children }) {
         user,
         addUser,
         removeUser,
+        resetData,  // Add this line
         userWorkouts,
         handleSave,
         handleWorkoutCompletion,
