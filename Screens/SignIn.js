@@ -5,7 +5,8 @@ import {
   Image,
   StatusBar,
   KeyboardAvoidingView,
-  Platform, ActivityIndicator,
+  Platform,
+  ActivityIndicator,
 } from "react-native";
 import Button from "../Components/Button";
 import Styles from "../assets/Styles";
@@ -35,6 +36,7 @@ export default function SignIn({ navigation }) {
       setError("");
       if (email === "test@email.com" && password === "test123") {
         userContext.addUser({
+          id: 0,
           name: "Test",
           email: "test@email.com",
           phone: "123-456-789",
@@ -79,6 +81,7 @@ export default function SignIn({ navigation }) {
 
               if (dataJson.success === true) {
                 userContext.addUser({
+                  id: dataJson.user.id,
                   name: dataJson.user.name,
                   email: dataJson.user.email,
                   phone: dataJson.user.phone,
@@ -93,6 +96,8 @@ export default function SignIn({ navigation }) {
                 });
                 setLoaderVisibility(false);
               }
+            } else if (response.status === 401) {
+              setError("Invalid email or password.");
             }
           } else {
             // If response is null (indicating timeout), set error message
@@ -102,8 +107,7 @@ export default function SignIn({ navigation }) {
           // If an error occurs during the request, log it and set error message
           console.error(error);
           setError("An error occurred. Please try again later.");
-        }
-        finally {
+        } finally {
           setLoaderVisibility(false);
         }
       }
@@ -123,7 +127,7 @@ export default function SignIn({ navigation }) {
           source={require("../assets/icons/app-logo.png")}
         />
       </View>
-      {loaderVisibility ? <ActivityIndicator/> : null}
+      {loaderVisibility ? <ActivityIndicator /> : null}
       <KeyboardAvoidingView
         style={[Styles.sub_container_b, { justifyContent: "flex-start" }]}
         behavior={Platform.OS === "ios" ? "padding" : null}

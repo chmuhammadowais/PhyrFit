@@ -1,53 +1,55 @@
-import {Alert, ScrollView, Text, View} from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 import Styles from "../assets/Styles";
 import React, { useContext, useState } from "react";
 import InputField from "../Components/InputField";
 import OptionsPicker from "../Components/OptionsPicker";
 import { UserContext } from "../Store/store";
 import Button from "../Components/Button";
+import Snackbar from "../Components/Snackbar";
 import LogoutButton from "../Components/LogoutButton";
+import { Colors } from "../assets/colors/colors";
 
-export default function Profile({navigation}) {
-  const { user, resetData } = useContext(UserContext);  // Get resetData from context
-  const [fullName, setFullName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState(user.phone);
-  const [height, setHeight] = useState(user.height);
-  const [weight, setWeight] = useState(user.weight);
-  const [age, setAge] = useState(user.age);
+export default function Profile({ navigation }) {
+  const { user, addUser, resetData } = useContext(UserContext); // Get resetData from context
+  const [id] = useState(user.id);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [age, setAge] = useState();
   const [error, setError] = useState("");
+  const [isVisible, setIsVisible] = useState(false);
   const items = [
     { label: "Loose Weight", value: "Loose Weight" },
     { label: "Gain Weight", value: "Gain Weight" },
     { label: "Get Fit", value: "Get Fit" },
   ];
   const [selectedItem, setSelectedItem] = useState(null);
+
   const handleLogout = async () => {
     try {
+      setError("");
       const timeoutMs = 30000;
       const response = await Promise.race([
-        fetch(`http://192.168.0.106:3000/users/logout`, {
+        fetch("http://192.168.0.106:3000/users/logout", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
         }),
         new Promise((_, reject) =>
-            setTimeout(
-                () => reject(new Error("Request timed out")),
-                timeoutMs
-            )
+          setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
         ),
       ]);
-      // Check if response exists
+
       if (response) {
-        // Check if response status is in the range 200-299 (indicating success)
         if (response.status >= 200 && response.status < 300) {
-          // If request is successful, proceed with further actions
           const data = await response.text();
           const dataJson = JSON.parse(data);
-          console.log(dataJson)
+          console.log(dataJson);
           if (dataJson.success === true) {
             resetData();
             navigation.navigate("SignIn");
@@ -55,99 +57,208 @@ export default function Profile({navigation}) {
               index: 0,
               routes: [{ name: "SignIn" }],
             });
-          }
-          else if(dataJson.success === false){
-           Alert.alert("Error", `${dataJson.message}. Please try again later.`)
+          } else if (dataJson.success === false) {
+            Alert.alert(
+              "Error",
+              `${dataJson.message}. Please try again later.`
+            );
           }
         }
       } else {
-        // If response is null (indicating timeout), set error message
-        setError("Request timed out. Please try again later.");
+        Alert.alert(
+          "Error",
+          "Server did not return a valid response. Please try again later."
+        );
       }
     } catch (error) {
-      // If an error occurs during the request, log it and set error message
-      console.error(error);
-      setError("An error occurred. Please try again later.");
+      Alert.alert("Error", "An error occurred. Please try again later.");
     }
-    finally {
-      setError("")
+  };
+
+  const handleUpdate = async () => {
+    try {
+      if (
+        fullName === "" &&
+        email === "" &&
+        phone === "" &&
+        age === "" &&
+        height === "" &&
+        weight === ""
+      ) {
+        setError("All input fields cannot be empty.");
+        return;
+      }
+      if (currentPassword === "") {
+        setError("Please provide current password.");
+        return;
+      }
+      setError("");
+      const timeoutMs = 30000;
+      const response = await Promise.race([
+        fetch(`http://192.168.0.106:3000/users/update/${id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: fullName ? fullName : user.name,
+            email: email ? email : user.email,
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+            age: age ? age : user.age,
+            phone: phone ? phone : user.phone,
+            height: height ? height : user.height,
+            weight: weight ? weight : user.weight,
+          }),
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
+        ),
+      ]);
+
+      if (response) {
+        if (response.status >= 200 && response.status < 300) {
+          const data = await response.text();
+          const dataJson = JSON.parse(data);
+
+          if (dataJson.success === true) {
+            addUser({
+              id,
+              name: fullName ? fullName : user.name,
+              email: email ? email : user.email,
+              age: age ? age : user.age,
+              phone: phone ? phone : user.phone,
+              height: height ? height : user.height,
+              weight: weight ? weight : user.weight,
+              goal: selectedItem ? selectedItem.value : user.goal,
+            });
+            setIsVisible(true);
+            clearForm();
+          } else if (dataJson.success === false) {
+            Alert.alert(
+              "Error",
+              `${dataJson.message}. Please try again later.`
+            );
+          }
+        }
+      } else {
+        Alert.alert(
+          "Error",
+          "Server did not return a valid response. Please try again later."
+        );
+      }
+    } catch (error) {
+      Alert.alert("Error", "An error occurred. Please try again later.");
     }
-  }
-  function clearForm() {
+  };
+
+  const clearForm = () => {
     setFullName("");
     setEmail("");
-    setPassword("");
+    setCurrentPassword("");
+    setNewPassword("");
     setPhone("");
     setHeight("");
     setWeight("");
     setAge("");
     setError("");
-  }
+  };
+
   return (
-      <View style={Styles.container}>
-        <View style={Styles.sub_container_c}>
-          <Text style={Styles.form_heading}>Profile</Text>
-          <LogoutButton onPress={handleLogout} />
-        </View>
-        <Text style={Styles.errorText}>{error}</Text>
-        <View style={Styles.sub_container_b}>
-          <ScrollView
-              contentContainerStyle={[Styles.scrollContainer]}
-          >
-            <InputField
-                style={Styles.input_container}
-                placeholder={fullName}
-                setText={setFullName}
-            />
-            <InputField
-                style={Styles.input_container}
-                placeholder={email}
-                inputMode={"email"}
-                keyboardType={"email-address"}
-                setText={setEmail}
-            />
-            <InputField
-                style={Styles.input_container}
-                placeholder={"Password"}
-                secureTextEntry
-                setText={setPassword}
-            />
-            <InputField
-                style={Styles.input_container}
-                placeholder={phone}
-                inputMode={"tel"}
-                setText={setPhone}
-            />
-            <InputField
-                style={Styles.input_container}
-                placeholder={`${age} Years`}
-                keyboardType={"numeric"}
-                setText={setAge}
-            />
-            <View style={Styles.sub_container_horizontal}>
-              <InputField
-                  placeholder={`${height} cm`}
-                  secureTextEntry={false}
-                  keyboardType={"decimal-pad"}
-                  width={"48%"}
-                  setText={setHeight}
-              />
-              <InputField
-                  placeholder={`${weight} KG`}
-                  secureTextEntry={false}
-                  keyboardType={"decimal-pad"}
-                  width={"48%"}
-                  setText={setWeight}
-              />
-            </View>
-            <OptionsPicker
-                items={items}
-                selectedItem={selectedItem}
-                setSelectedItem={setSelectedItem}
-            />
-            <Button text={"Update"} />
-          </ScrollView>
-        </View>
+    <View style={Styles.container}>
+      <View style={Styles.sub_container_c}>
+        <Text style={Styles.form_heading}>Profile</Text>
+        <LogoutButton onPress={handleLogout} />
       </View>
+      <Text style={Styles.errorText}>{error}</Text>
+      <View style={Styles.sub_container_b}>
+        <ScrollView contentContainerStyle={[Styles.scrollContainer]}>
+          <InputField
+            style={Styles.input_container}
+            placeholder={user.name}
+            setText={setFullName}
+            text={fullName}
+          />
+          <InputField
+            style={Styles.input_container}
+            placeholder={user.email}
+            inputMode={"email"}
+            keyboardType={"email-address"}
+            setText={setEmail}
+            text={email}
+          />
+          <InputField
+            style={Styles.input_container}
+            placeholder={"Current Password"}
+            secureTextEntry
+            setText={setCurrentPassword}
+            text={currentPassword}
+          />
+          <InputField
+            style={Styles.input_container}
+            placeholder={"New Password"}
+            secureTextEntry
+            setText={setNewPassword}
+            text={newPassword}
+          />
+          <InputField
+            style={Styles.input_container}
+            placeholder={user.phone}
+            inputMode={"tel"}
+            setText={setPhone}
+            text={phone}
+          />
+          <InputField
+            style={Styles.input_container}
+            placeholder={user.age.toString()}
+            keyboardType={"numeric"}
+            setText={setAge}
+            text={age}
+          />
+          <View style={Styles.sub_container_horizontal}>
+            <InputField
+              placeholder={user.height.toString()}
+              keyboardType={"decimal-pad"}
+              width={"48%"}
+              setText={setHeight}
+              text={height}
+            />
+            <InputField
+              placeholder={user.weight.toString()}
+              keyboardType={"decimal-pad"}
+              width={"48%"}
+              setText={setWeight}
+              text={weight}
+            />
+          </View>
+          <OptionsPicker
+            items={items}
+            selectedItem={selectedItem}
+            setSelectedItem={setSelectedItem}
+          />
+          <Button text={"Update"} onPress={handleUpdate} />
+        </ScrollView>
+      </View>
+      <Text style={[Styles.loading_text, { fontSize: 14 }]}>User ID: {id}</Text>
+      {isVisible && (
+        <Snackbar
+          message="Profile updated successfully"
+          actionText="Dismiss"
+          onActionPress={() => {
+            setIsVisible(false);
+            clearForm();
+            navigation.navigate("SignIn");
+          }}
+          duration={5000}
+          position="bottom"
+          backgroundColor={Colors.FilledCircleDark}
+          textColor="white"
+          actionTextColor="white"
+          containerStyle={{ marginHorizontal: 12 }}
+          messageStyle={{}}
+          actionTextStyle={{}}
+        />
+      )}
+    </View>
   );
 }

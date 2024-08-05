@@ -7,7 +7,8 @@ import {
   KeyboardAvoidingView,
   Keyboard,
   Platform,
-  ScrollView, ActivityIndicator,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import Button from "../Components/Button";
 import Styles from "../assets/Styles";
@@ -92,7 +93,7 @@ export default function SignUp({ navigation }) {
             // If request is successful, proceed with further actions
             const data = await response.text();
             const dataJson = JSON.parse(data);
-            console.log(dataJson);
+
             if (dataJson.success === true) {
               setIsVisible(true);
             }
@@ -105,8 +106,7 @@ export default function SignUp({ navigation }) {
         // If an error occurs during the request, log it and set error message
         console.error(error);
         setError("An error occurred. Please try again later.");
-      }
-      finally {
+      } finally {
         setError("");
         setLoaderVisibility(false);
       }
@@ -142,7 +142,7 @@ export default function SignUp({ navigation }) {
           source={require("../assets/icons/app-logo.png")}
         />
       </View>
-      {loaderVisibility ? <ActivityIndicator/> : null}
+      {loaderVisibility ? <ActivityIndicator /> : null}
       <KeyboardAvoidingView
         style={Styles.sub_container_b}
         behavior={Platform.OS === "ios" ? "padding" : null}
