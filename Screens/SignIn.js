@@ -18,7 +18,7 @@ export default function SignIn({ navigation }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loaderVisibility, setLoaderVisibility] = useState(false);
-  const userContext = useContext(UserContext); // Access context once
+  const userContext = useContext(UserContext);
 
   async function signInHandler() {
     console.log(email, password);
@@ -34,82 +34,56 @@ export default function SignIn({ navigation }) {
       setLoaderVisibility(false);
     } else {
       setError("");
-      if (email === "test@email.com" && password === "test123") {
-        userContext.addUser({
-          id: 0,
-          name: "Test",
-          email: "test@email.com",
-          phone: "123-456-789",
-          age: "20",
-          height: "170",
-          weight: "70",
-        });
-        navigation.navigate("Main");
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Main" }],
-        });
-      } else {
-        try {
-          const timeoutMs = 30000;
-          const response = await Promise.race([
-            fetch(`http://192.168.0.106:3000/users/login`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email: email,
-                password: password,
-              }),
+      try {
+        const timeoutMs = 30000;
+        const response = await Promise.race([
+          fetch(`http://192.168.0.106:3000/users/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: email,
+              password: password,
             }),
-            new Promise((_, reject) =>
-              setTimeout(
-                () => reject(new Error("Request timed out")),
-                timeoutMs
-              )
-            ),
-          ]);
+          }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
+          ),
+        ]);
 
-          // Check if response exists
-          if (response) {
-            // Check if response status is in the range 200-299 (indicating success)
-            if (response.status >= 200 && response.status < 300) {
-              // If request is successful, proceed with further actions
-              const data = await response.text();
-              const dataJson = JSON.parse(data);
+        if (response.status >= 200 && response.status < 300) {
+          const data = await response.json();
+          if (data.success) {
+            // Store user and token in context
+            userContext.addUser({
+              id: data.user.uid,
+              name: data.user.name,
+              email: data.user.email,
+              phone: data.user.phone,
+              age: data.user.age,
+              height: data.user.height,
+              weight: data.user.weight,
+            });
 
-              if (dataJson.success === true) {
-                userContext.addUser({
-                  id: dataJson.user.id,
-                  name: dataJson.user.name,
-                  email: dataJson.user.email,
-                  phone: dataJson.user.phone,
-                  age: dataJson.user.age,
-                  height: dataJson.user.height,
-                  weight: dataJson.user.weight,
-                });
-                navigation.navigate("Main");
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: "Main" }],
-                });
-                setLoaderVisibility(false);
-              }
-            } else if (response.status === 401) {
-              setError("Invalid email or password.");
-            }
+            userContext.setToken(data.idToken);
+
+            navigation.navigate("Main");
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Main" }],
+            });
           } else {
-            // If response is null (indicating timeout), set error message
-            setError("Request timed out. Please try again later.");
+            setError("Invalid email or password.");
           }
-        } catch (error) {
-          // If an error occurs during the request, log it and set error message
-          console.error(error);
-          setError("An error occurred. Please try again later.");
-        } finally {
-          setLoaderVisibility(false);
+        } else {
+          setError("Invalid email or password.");
         }
+      } catch (error) {
+        console.error(error);
+        setError("An error occurred. Please try again later.");
+      } finally {
+        setLoaderVisibility(false);
       }
     }
   }

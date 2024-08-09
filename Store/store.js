@@ -12,7 +12,9 @@ export const UserContext = createContext({
     weight: "",
     goal: "",
   },
+  token: "",
   addUser: (userData) => {},
+  setToken: (token) => {},
   removeUser: () => {},
   resetData: () => {},
   handleSave: (workoutData, editIndex) => {},
@@ -31,11 +33,12 @@ export default function UserContextProvider({ children }) {
     weight: "",
     goal: "",
   });
+  const [token, setToken] = useState("");
   const [userWorkouts, setUserWorkouts] = useState([]);
 
   const addUser = (userData) => setUser(userData);
 
-  const removeUser = () =>
+  const removeUser = () => {
     setUser({
       id: 0,
       name: "",
@@ -46,6 +49,8 @@ export default function UserContextProvider({ children }) {
       weight: "",
       goal: "",
     });
+    setToken(""); // Clear token when user is removed
+  };
 
   const resetData = () => {
     setUser({
@@ -58,6 +63,7 @@ export default function UserContextProvider({ children }) {
       weight: "",
       goal: "",
     });
+    setToken("");
     setUserWorkouts([]);
   };
 
@@ -122,7 +128,9 @@ export default function UserContextProvider({ children }) {
 
   const value = {
     user,
+    token,
     addUser,
+    setToken,
     removeUser,
     resetData,
     userWorkouts,

@@ -39,8 +39,10 @@ export default function SignUp({ navigation }) {
     setAge("");
     setError("");
   }
+
   async function handleSignup() {
     setLoaderVisibility(true);
+
     if (
       fullName.trim() === "" ||
       email.trim() === "" ||
@@ -52,64 +54,60 @@ export default function SignUp({ navigation }) {
     ) {
       setError("Please enter all the fields.");
       setLoaderVisibility(false);
+      return;
     } else if (!email.trim().includes("@") || !email.trim().endsWith(".com")) {
-      setError("Please provide a valid email address");
+      setError("Please provide a valid email address.");
       setLoaderVisibility(false);
+      return;
     } else if (password.trim().length < 6) {
-      setError("Password should contain more than 6 characters");
+      setError("Password should contain more than 6 characters.");
       setLoaderVisibility(false);
-    } else if (Number(age.trim()) <= 0 || Number(age.trim() <= 12)) {
-      setError("Age requirement is 13 and above");
+      return;
+    } else if (Number(age.trim()) <= 12) {
+      setError("Age requirement is 13 and above.");
       setLoaderVisibility(false);
-    } else {
-      setError("");
-      try {
-        const timeoutMs = 30000;
-        const response = await Promise.race([
-          fetch(`http://192.168.0.106:3000/users/register`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: fullName,
-              email: email,
-              password: password,
-              age: age,
-              phone: phone,
-              height: height,
-              weight: weight,
-            }),
+      return;
+    }
+
+    setError("");
+    try {
+      const response = await Promise.race([
+        fetch(`http://192.168.0.106:3000/users/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: fullName,
+            email: email,
+            password: password,
+            age: age,
+            phone: phone,
+            height: height,
+            weight: weight,
           }),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
-          ),
-        ]);
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Request timed out")), 30000)
+        ),
+      ]);
 
-        // Check if response exists
-        if (response) {
-          // Check if response status is in the range 200-299 (indicating success)
-          if (response.status >= 200 && response.status < 300) {
-            // If request is successful, proceed with further actions
-            const data = await response.text();
-            const dataJson = JSON.parse(data);
-
-            if (dataJson.success === true) {
-              setIsVisible(true);
-            }
-          }
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to register. Please try again.");
+      } else {
+        const data = await response.json();
+        if (data.success) {
+          setIsVisible(true);
         } else {
-          // If response is null (indicating timeout), set error message
-          setError("Request timed out. Please try again later.");
+          setError(data.message || "Registration failed. Please try again.");
         }
-      } catch (error) {
-        // If an error occurs during the request, log it and set error message
-        console.error(error);
-        setError("An error occurred. Please try again later.");
-      } finally {
-        setError("");
-        setLoaderVisibility(false);
       }
+    } catch (error) {
+      console.error(error);
+      setError("An error occurred. Please try again later.");
+    } finally {
+      setLoaderVisibility(false);
     }
   }
 
@@ -131,7 +129,7 @@ export default function SignUp({ navigation }) {
       keyboardDidShowListener.remove();
       keyboardDidHideListener.remove();
     };
-  }, [setKeyboardAvailable]);
+  }, []);
 
   return (
     <View style={Styles.container}>
@@ -142,14 +140,14 @@ export default function SignUp({ navigation }) {
           source={require("../assets/icons/app-logo.png")}
         />
       </View>
-      {loaderVisibility ? <ActivityIndicator /> : null}
+      {loaderVisibility && <ActivityIndicator />}
       <KeyboardAvoidingView
         style={Styles.sub_container_b}
         behavior={Platform.OS === "ios" ? "padding" : null}
         keyboardVerticalOffset={50}
       >
         <Text style={Styles.form_heading}>SignUp</Text>
-        <Text style={Styles.errorText}>{error}</Text>
+        {error ? <Text style={Styles.errorText}>{error}</Text> : null}
         <ScrollView contentContainerStyle={Styles.scrollContainer}>
           <InputField
             style={Styles.input_container}
@@ -211,7 +209,7 @@ export default function SignUp({ navigation }) {
           customStyle={isKeyboardAvailable ? { marginBottom: -20 } : {}}
         />
       </KeyboardAvoidingView>
-      {isVisible ? (
+      {isVisible && (
         <Snackbar
           message="Sign up successful"
           actionText="Dismiss"
@@ -226,10 +224,8 @@ export default function SignUp({ navigation }) {
           textColor="white"
           actionTextColor="white"
           containerStyle={{ marginHorizontal: 12 }}
-          messageStyle={{}}
-          actionTextStyle={{}}
         />
-      ) : null}
+      )}
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { Alert, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
 import Styles from "../assets/Styles";
 import React, { useContext, useState } from "react";
 import InputField from "../Components/InputField";
@@ -10,7 +10,7 @@ import LogoutButton from "../Components/LogoutButton";
 import { Colors } from "../assets/colors/colors";
 
 export default function Profile({ navigation }) {
-  const { user, addUser, resetData } = useContext(UserContext); // Get resetData from context
+  const { user, addUser, resetData, token } = useContext(UserContext);
   const [id] = useState(user.id);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,8 +19,9 @@ export default function Profile({ navigation }) {
   const [phone, setPhone] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [age, setAge] = useState();
+  const [age, setAge] = useState("");
   const [error, setError] = useState("");
+  const [loaderVisibility, setLoaderVisibility] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const items = [
     { label: "Loose Weight", value: "Loose Weight" },
@@ -28,16 +29,16 @@ export default function Profile({ navigation }) {
     { label: "Get Fit", value: "Get Fit" },
   ];
   const [selectedItem, setSelectedItem] = useState(null);
-
   const handleLogout = async () => {
     try {
       setError("");
       const timeoutMs = 30000;
       const response = await Promise.race([
         fetch("http://192.168.0.106:3000/users/logout", {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Ensure `user.token` contains the correct token
           },
         }),
         new Promise((_, reject) =>
@@ -45,24 +46,16 @@ export default function Profile({ navigation }) {
         ),
       ]);
 
-      if (response) {
-        if (response.status >= 200 && response.status < 300) {
-          const data = await response.text();
-          const dataJson = JSON.parse(data);
-          console.log(dataJson);
-          if (dataJson.success === true) {
-            resetData();
-            navigation.navigate("SignIn");
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "SignIn" }],
-            });
-          } else if (dataJson.success === false) {
-            Alert.alert(
-              "Error",
-              `${dataJson.message}. Please try again later.`
-            );
-          }
+      if (response && response.status >= 200 && response.status < 300) {
+        const data = await response.json();
+        if (data.success) {
+          resetData();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "SignIn" }],
+          });
+        } else {
+          Alert.alert("Error", `${data.message}. Please try again later.`);
         }
       } else {
         Alert.alert(
@@ -92,23 +85,26 @@ export default function Profile({ navigation }) {
         setError("Please provide current password.");
         return;
       }
+      setLoaderVisibility(true);
       setError("");
       const timeoutMs = 30000;
       const response = await Promise.race([
-        fetch(`http://192.168.0.106:3000/users/update/${id}`, {
-          method: "POST",
+        fetch(`http://192.168.0.106:3000/users/update`, {
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            name: fullName ? fullName : user.name,
-            email: email ? email : user.email,
-            currentPassword: currentPassword,
-            newPassword: newPassword,
-            age: age ? age : user.age,
-            phone: phone ? phone : user.phone,
-            height: height ? height : user.height,
-            weight: weight ? weight : user.weight,
+            name: fullName || user.name,
+            email: email || user.email,
+            currentPassword,
+            newPassword: newPassword || null,
+            age: age || user.age,
+            phone: phone || user.phone,
+            height: height || user.height,
+            weight: weight || user.weight,
+            goal: selectedItem ? selectedItem.value : user.goal,
           }),
         }),
         new Promise((_, reject) =>
@@ -116,30 +112,23 @@ export default function Profile({ navigation }) {
         ),
       ]);
 
-      if (response) {
-        if (response.status >= 200 && response.status < 300) {
-          const data = await response.text();
-          const dataJson = JSON.parse(data);
-
-          if (dataJson.success === true) {
-            addUser({
-              id,
-              name: fullName ? fullName : user.name,
-              email: email ? email : user.email,
-              age: age ? age : user.age,
-              phone: phone ? phone : user.phone,
-              height: height ? height : user.height,
-              weight: weight ? weight : user.weight,
-              goal: selectedItem ? selectedItem.value : user.goal,
-            });
-            setIsVisible(true);
-            clearForm();
-          } else if (dataJson.success === false) {
-            Alert.alert(
-              "Error",
-              `${dataJson.message}. Please try again later.`
-            );
-          }
+      if (response && response.status >= 200 && response.status < 300) {
+        const data = await response.json();
+        if (data.success) {
+          addUser({
+            id,
+            name: fullName || user.name,
+            email: email || user.email,
+            age: age || user.age,
+            phone: phone || user.phone,
+            height: height || user.height,
+            weight: weight || user.weight,
+            goal: selectedItem ? selectedItem.value : user.goal,
+          });
+          setIsVisible(true);
+          clearForm();
+        } else {
+          Alert.alert("Error", `${data.message}. Please try again later.`);
         }
       } else {
         Alert.alert(
@@ -149,6 +138,8 @@ export default function Profile({ navigation }) {
       }
     } catch (error) {
       Alert.alert("Error", "An error occurred. Please try again later.");
+    } finally {
+      setLoaderVisibility(false);
     }
   };
 
@@ -170,7 +161,11 @@ export default function Profile({ navigation }) {
         <Text style={Styles.form_heading}>Profile</Text>
         <LogoutButton onPress={handleLogout} />
       </View>
+
+      {loaderVisibility ? <ActivityIndicator /> : null}
+
       <Text style={Styles.errorText}>{error}</Text>
+
       <View style={Styles.sub_container_b}>
         <ScrollView contentContainerStyle={[Styles.scrollContainer]}>
           <InputField
@@ -255,8 +250,6 @@ export default function Profile({ navigation }) {
           textColor="white"
           actionTextColor="white"
           containerStyle={{ marginHorizontal: 12 }}
-          messageStyle={{}}
-          actionTextStyle={{}}
         />
       )}
     </View>
