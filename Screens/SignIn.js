@@ -74,10 +74,10 @@ export default function SignIn({ navigation }) {
               routes: [{ name: "Main" }],
             });
           } else {
-            setError("Invalid email or password.");
+            setError("Server did not returned a valid response.");
           }
         } else {
-          setError("Invalid email or password.");
+          setError("Netwoek error");
         }
       } catch (error) {
         console.error(error);
