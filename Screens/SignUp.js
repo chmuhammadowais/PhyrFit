@@ -15,6 +15,7 @@ import Styles from "../assets/Styles";
 import InputField from "../Components/InputField";
 import Snackbar from "../Components/Snackbar";
 import { Colors } from "../assets/colors/colors";
+import Constants from "expo-constants";
 
 export default function SignUp({ navigation }) {
   const [fullName, setFullName] = useState("");
@@ -28,7 +29,7 @@ export default function SignUp({ navigation }) {
   const [isKeyboardAvailable, setKeyboardAvailable] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [loaderVisibility, setLoaderVisibility] = useState(false);
-
+  const extras = Constants.expoConfig.extras;
   function clearForm() {
     setFullName("");
     setEmail("");
@@ -72,7 +73,7 @@ export default function SignUp({ navigation }) {
     setError("");
     try {
       const response = await Promise.race([
-        fetch(`http://192.168.0.106:3000/users/register`, {
+        fetch(`http://${extras.IP_ADDRESS}:${extras.PORT}/users/register`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

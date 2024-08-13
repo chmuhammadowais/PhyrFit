@@ -12,6 +12,7 @@ import Button from "../Components/Button";
 import Styles from "../assets/Styles";
 import InputField from "../Components/InputField";
 import { UserContext } from "../Store/store";
+import Constants from "expo-constants";
 
 export default function SignIn({ navigation }) {
   const [email, setEmail] = useState("");
@@ -19,6 +20,7 @@ export default function SignIn({ navigation }) {
   const [error, setError] = useState("");
   const [loaderVisibility, setLoaderVisibility] = useState(false);
   const userContext = useContext(UserContext);
+  const extras = Constants.expoConfig.extras;
 
   async function signInHandler() {
     console.log(email, password);
@@ -37,7 +39,7 @@ export default function SignIn({ navigation }) {
       try {
         const timeoutMs = 30000;
         const response = await Promise.race([
-          fetch(`http://192.168.0.106:3000/users/login`, {
+          fetch(`http://${extras.IP_ADDRESS}:${extras.PORT}/users/login`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

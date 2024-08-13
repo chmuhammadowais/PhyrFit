@@ -8,6 +8,7 @@ import Button from "../Components/Button";
 import Snackbar from "../Components/Snackbar";
 import LogoutButton from "../Components/LogoutButton";
 import { Colors } from "../assets/colors/colors";
+import Constants from "expo-constants";
 
 export default function Profile({ navigation }) {
   const { user, addUser, resetData, token } = useContext(UserContext);
@@ -29,16 +30,19 @@ export default function Profile({ navigation }) {
     { label: "Get Fit", value: "Get Fit" },
   ];
   const [selectedItem, setSelectedItem] = useState(null);
+  const extras = Constants.expoConfig.extras;
+
   const handleLogout = async () => {
     try {
       setError("");
+      setLoaderVisibility(true);
       const timeoutMs = 30000;
       const response = await Promise.race([
-        fetch("http://192.168.0.106:3000/users/logout", {
+        fetch(`http://${extras.IP_ADDRESS}:${extras.PORT}/users/logout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Ensure `user.token` contains the correct token
+            Authorization: `Bearer ${token}`,
           },
         }),
         new Promise((_, reject) =>
@@ -65,6 +69,8 @@ export default function Profile({ navigation }) {
       }
     } catch (error) {
       Alert.alert("Error", "An error occurred. Please try again later.");
+    } finally {
+      setLoaderVisibility(false);
     }
   };
 
@@ -89,7 +95,7 @@ export default function Profile({ navigation }) {
       setError("");
       const timeoutMs = 30000;
       const response = await Promise.race([
-        fetch(`http://192.168.0.106:3000/users/update`, {
+        fetch(`http://${extras.IP_ADDRESS}:${extras.PORT}/users/update`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
