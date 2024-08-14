@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import { Alert } from "react-native";
 
 export const UserContext = createContext({
@@ -20,6 +20,9 @@ export const UserContext = createContext({
   handleSave: (workoutData, editIndex) => {},
   handleWorkoutCompletion: (day) => {},
   handleWorkoutIncompletion: (day) => {},
+  userWorkouts: [],
+  handleDelete: (workoutId) => {},
+  fetchWorkouts: () => {},
 });
 
 export default function UserContextProvider({ children }) {
@@ -67,24 +70,37 @@ export default function UserContextProvider({ children }) {
     setUserWorkouts([]);
   };
 
-  const handleSave = (workoutData, editIndex) => {
+  // Function to fetch workouts from the server
+  const fetchWorkouts = async () => {
+    try {
+      const response = await fetch("http://192.168.0.106:3000/users/workouts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setUserWorkouts(data.workouts);
+      }
+    } catch (error) {
+      console.error("Error fetching workouts:", error);
+    }
+  };
+
+  // Fetch workouts when the component mounts or when the token changes
+  useEffect(() => {
+    if (token) {
+      fetchWorkouts();
+    }
+  }, [token]);
+
+  const handleSave = async (workoutData, editIndex) => {
     const { trainingDayName, selectedItem, exercises, repCount, setCount } =
       workoutData;
 
     if (trainingDayName === "" || selectedItem === "") {
       Alert.alert("Error", "Workout name and day cannot be empty.");
-      return;
-    }
-
-    const duplicateCheck = userWorkouts.some(
-      (item, index) =>
-        item.name === trainingDayName &&
-        item.day === selectedItem &&
-        index !== editIndex
-    );
-
-    if (duplicateCheck) {
-      Alert.alert("Error", "Duplicate workout detected.");
       return;
     }
 
@@ -101,12 +117,69 @@ export default function UserContextProvider({ children }) {
       isCompleted: null,
     };
 
-    if (editIndex !== null) {
-      const updatedWorkouts = [...userWorkouts];
-      updatedWorkouts[editIndex] = newWorkout;
-      setUserWorkouts(updatedWorkouts);
-    } else {
-      setUserWorkouts([...userWorkouts, newWorkout]);
+    try {
+      let response;
+      if (editIndex !== null) {
+        // Update existing workout
+        const workoutId = userWorkouts[editIndex].id;
+        response = await fetch(
+          `http://192.168.0.106:3000/users/workouts/${workoutId}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newWorkout),
+          }
+        );
+      } else {
+        // Add new workout
+        response = await fetch("http://192.168.0.106:3000/users/workouts", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newWorkout),
+        });
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        // Fetch updated workouts
+        fetchWorkouts();
+      } else {
+        throw new Error(data.message || "Failed to save workout");
+      }
+    } catch (error) {
+      console.error("Error saving workout:", error);
+      Alert.alert("Error", "Failed to save workout. Please try again.");
+    }
+  };
+
+  const handleDelete = async (workoutId) => {
+    try {
+      const response = await fetch(
+        `http://192.168.0.106:3000/users/workouts/${workoutId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      if (data.success) {
+        // Fetch updated workouts
+        fetchWorkouts();
+      } else {
+        throw new Error(data.message || "Failed to delete workout");
+      }
+    } catch (error) {
+      console.error("Error deleting workout:", error);
+      Alert.alert("Error", "Failed to delete workout. Please try again.");
     }
   };
 
@@ -137,7 +210,8 @@ export default function UserContextProvider({ children }) {
     handleSave,
     handleWorkoutCompletion,
     handleWorkoutIncompletion,
-    setUserWorkouts,
+    handleDelete,
+    fetchWorkouts,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
