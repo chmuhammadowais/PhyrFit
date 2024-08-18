@@ -21,13 +21,13 @@ const initialExercises = [
 ];
 
 const days = [
+  { label: "Sunday", value: 0 },
   { label: "Monday", value: 1 },
   { label: "Tuesday", value: 2 },
   { label: "Wednesday", value: 3 },
   { label: "Thursday", value: 4 },
   { label: "Friday", value: 5 },
   { label: "Saturday", value: 6 },
-  { label: "Sunday", value: 0 },
 ];
 
 export default function AddWorkoutModal({
@@ -40,7 +40,7 @@ export default function AddWorkoutModal({
   const [trainingDayName, setTrainingDayName] = useState("");
   const [setCount, setSetCount] = useState("");
   const [repCount, setRepCount] = useState("");
-  const [selectedItem, setSelectedItem] = useState("");
+  const [selectedItem, setSelectedItem] = useState(0);
   const [exercises, setExercises] = useState(initialExercises);
   const [modalVisibleEx, setModalVisibleEx] = useState(false);
 
@@ -78,7 +78,7 @@ export default function AddWorkoutModal({
     setTrainingDayName("");
     setSetCount("");
     setRepCount("");
-    setSelectedItem("");
+    setSelectedItem(0);
     setExercises(
       initialExercises.map((exercise) => ({ ...exercise, isChecked: false }))
     );
