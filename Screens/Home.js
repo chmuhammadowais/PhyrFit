@@ -1,40 +1,65 @@
+import React, { useContext, useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import Styles from "../assets/Styles";
 import BasicCardView from "../Components/BasicCardView";
-import React, { useContext, useEffect, useState } from "react";
 import AchievementsCardView from "../Components/AchievementsCardView";
 import QuoteCardView from "../Components/QuoteCardView";
 import MyMotivationCardView from "../Components/MyMotivationCardView";
 import { UserContext } from "../Store/store";
 
 export default function Home() {
-  const { userWorkouts, handleWorkoutCompletion, handleWorkoutIncompletion } =
-    useContext(UserContext);
+  const {
+    userWorkouts,
+    workoutStatuses,
+    handleWorkoutCompletion,
+    handleWorkoutIncompletion,
+    fetchWorkoutStatuses,
+    user,
+  } = useContext(UserContext);
 
-  const today = new Date().getDay(); // Get today's day as a number (0 for Sunday, 1 for Monday, etc.)
   const [todayFocus, setTodayFocus] = useState([]);
   const [tempIsCompleted, setTempIsCompleted] = useState(null);
+
   const totalWorkoutDays = userWorkouts.length;
-  const completedWorkoutDays = userWorkouts.filter(
-    (item) => item.isCompleted === true
-  );
+  const completedWorkoutDays = workoutStatuses.filter(
+    (status) => status.isCompleted
+  ).length;
+
+  const today = new Date().getDay();
+  const todayString = new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
+    fetchWorkoutStatuses();
+  }, [fetchWorkoutStatuses]);
 
   useEffect(() => {
     const todayWorkouts = userWorkouts.filter((item) => item.day === today);
     setTodayFocus(todayWorkouts);
-    setTempIsCompleted(
-      todayWorkouts.length > 0 ? todayWorkouts[0].isCompleted : ""
-    );
-  }, [userWorkouts, today]);
+
+    if (todayWorkouts.length > 0) {
+      const todayStatus = workoutStatuses.find(
+        (status) =>
+          status.date === todayString &&
+          status.workoutId === todayWorkouts[0].id
+      );
+      setTempIsCompleted(todayStatus ? todayStatus.isCompleted : null);
+    } else {
+      setTempIsCompleted(null);
+    }
+  }, [userWorkouts, workoutStatuses, today, todayString]);
 
   const completeWorkout = () => {
-    handleWorkoutCompletion(today);
-    setTempIsCompleted(true); // Update the temp state immediately
+    if (todayFocus.length > 0) {
+      handleWorkoutCompletion(todayFocus[0].id);
+      setTempIsCompleted(true);
+    }
   };
 
   const incompleteWorkout = () => {
-    handleWorkoutIncompletion(today);
-    setTempIsCompleted(false); // Update the temp state immediately
+    if (todayFocus.length > 0) {
+      handleWorkoutIncompletion(todayFocus[0].id);
+      setTempIsCompleted(false);
+    }
   };
 
   return (
@@ -65,7 +90,7 @@ export default function Home() {
           />
           <AchievementsCardView
             totalWorkoutDays={totalWorkoutDays}
-            completedWorkoutDays={completedWorkoutDays.length}
+            completedWorkoutDays={completedWorkoutDays}
           />
           <QuoteCardView />
           <MyMotivationCardView />

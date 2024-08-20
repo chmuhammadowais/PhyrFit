@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 import { Alert } from "react-native";
 
 export const UserContext = createContext({
@@ -18,12 +18,16 @@ export const UserContext = createContext({
   removeUser: () => {},
   resetData: () => {},
   handleSave: (workoutData, editIndex) => {},
-  handleWorkoutCompletion: (day) => {},
-  handleWorkoutIncompletion: (day) => {},
+  handleWorkoutCompletion: (workoutId) => {},
+  handleWorkoutIncompletion: (workoutId) => {},
   userWorkouts: [],
+  workoutStatuses: [],
   handleDelete: (workoutId) => {},
   fetchWorkouts: () => {},
+  fetchWorkoutStatuses: () => {},
 });
+
+const API_BASE_URL = "http://192.168.0.103:3000"; // Consider using an environment variable for this
 
 export default function UserContextProvider({ children }) {
   const [user, setUser] = useState({
@@ -38,24 +42,11 @@ export default function UserContextProvider({ children }) {
   });
   const [token, setToken] = useState("");
   const [userWorkouts, setUserWorkouts] = useState([]);
+  const [workoutStatuses, setWorkoutStatuses] = useState([]);
 
-  const addUser = (userData) => setUser(userData);
+  const addUser = useCallback((userData) => setUser(userData), []);
 
-  const removeUser = () => {
-    setUser({
-      id: 0,
-      name: "",
-      email: "",
-      phone: "",
-      age: "",
-      height: "",
-      weight: "",
-      goal: "",
-    });
-    setToken(""); // Clear token when user is removed
-  };
-
-  const resetData = () => {
+  const removeUser = useCallback(() => {
     setUser({
       id: 0,
       name: "",
@@ -67,137 +58,243 @@ export default function UserContextProvider({ children }) {
       goal: "",
     });
     setToken("");
-    setUserWorkouts([]);
-  };
+  }, []);
 
-  // Function to fetch workouts from the server
-  const fetchWorkouts = async () => {
+  const resetData = useCallback(() => {
+    removeUser();
+    setUserWorkouts([]);
+    setWorkoutStatuses([]);
+  }, [removeUser]);
+
+  const fetchWorkouts = useCallback(async () => {
     try {
-      const response = await fetch("http://192.168.0.106:3000/users/workouts", {
+      const response = await fetch(`${API_BASE_URL}/users/workouts`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       if (data.success) {
         setUserWorkouts(data.workouts);
+      } else {
+        console.error("Failed to fetch workouts:", data.message);
       }
     } catch (error) {
       console.error("Error fetching workouts:", error);
     }
-  };
+  }, [token]);
 
-  // Fetch workouts when the component mounts or when the token changes
+  const fetchWorkoutStatuses = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/users/workoutStatus/${user.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setWorkoutStatuses(data.statuses);
+      } else {
+        console.error("Failed to fetch workout statuses:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching workout statuses:", error);
+    }
+  }, [token, user.id]);
+
   useEffect(() => {
     if (token) {
       fetchWorkouts();
+      fetchWorkoutStatuses();
     }
-  }, [token]);
+  }, [token, fetchWorkouts, fetchWorkoutStatuses]);
 
-  const handleSave = async (workoutData, editIndex) => {
-    const { trainingDayName, selectedItem, exercises, repCount, setCount } =
-      workoutData;
+  const handleSave = useCallback(
+    async (workoutData, editIndex) => {
+      const { trainingDayName, selectedItem, exercises, repCount, setCount } =
+        workoutData;
 
-    if (trainingDayName === "" || selectedItem === "") {
-      Alert.alert("Error", "Workout name and day cannot be empty.");
-      return;
-    }
+      if (trainingDayName === "" || selectedItem === "") {
+        Alert.alert("Error", "Workout name and day cannot be empty.");
+        return;
+      }
 
-    const selectedExercises = exercises.filter(
-      (exercise) => exercise.isChecked
-    );
+      const selectedExercises = exercises.filter(
+        (exercise) => exercise.isChecked
+      );
 
-    const newWorkout = {
-      name: trainingDayName,
-      day: selectedItem,
-      setCount,
-      repCount,
-      exercises: selectedExercises,
-      isCompleted: null,
-    };
+      const newWorkout = {
+        name: trainingDayName,
+        day: selectedItem,
+        setCount,
+        repCount,
+        exercises: selectedExercises,
+        isCompleted: null,
+      };
 
-    try {
-      let response;
-      if (editIndex !== null) {
-        // Update existing workout
-        const workoutId = userWorkouts[editIndex].id;
-        response = await fetch(
-          `http://192.168.0.106:3000/users/workouts/${workoutId}`,
-          {
-            method: "PUT",
+      try {
+        let response;
+        if (editIndex !== null) {
+          const workoutId = userWorkouts[editIndex].id;
+          response = await fetch(
+            `${API_BASE_URL}/users/workouts/${workoutId}`,
+            {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(newWorkout),
+            }
+          );
+        } else {
+          response = await fetch(`${API_BASE_URL}/users/workouts`, {
+            method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify(newWorkout),
+          });
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          fetchWorkouts();
+        } else {
+          throw new Error(data.message || "Failed to save workout");
+        }
+      } catch (error) {
+        console.error("Error saving workout:", error);
+        Alert.alert("Error", "Failed to save workout. Please try again.");
+      }
+    },
+    [token, userWorkouts, fetchWorkouts]
+  );
+
+  const handleDelete = useCallback(
+    async (workoutId) => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/users/workouts/${workoutId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           }
         );
-      } else {
-        // Add new workout
-        response = await fetch("http://192.168.0.106:3000/users/workouts", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newWorkout),
-        });
-      }
 
-      const data = await response.json();
-      if (data.success) {
-        // Fetch updated workouts
-        fetchWorkouts();
-      } else {
-        throw new Error(data.message || "Failed to save workout");
-      }
-    } catch (error) {
-      console.error("Error saving workout:", error);
-      Alert.alert("Error", "Failed to save workout. Please try again.");
-    }
-  };
-
-  const handleDelete = async (workoutId) => {
-    try {
-      const response = await fetch(
-        `http://192.168.0.106:3000/users/workouts/${workoutId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      );
-      const data = await response.json();
-      if (data.success) {
-        // Fetch updated workouts
-        fetchWorkouts();
-      } else {
-        throw new Error(data.message || "Failed to delete workout");
+
+        const data = await response.json();
+        if (data.success) {
+          fetchWorkouts();
+        } else {
+          throw new Error(data.message || "Failed to delete workout");
+        }
+      } catch (error) {
+        console.error("Error deleting workout:", error);
+        Alert.alert("Error", "Failed to delete workout. Please try again.");
       }
-    } catch (error) {
-      console.error("Error deleting workout:", error);
-      Alert.alert("Error", "Failed to delete workout. Please try again.");
-    }
-  };
+    },
+    [token, fetchWorkouts]
+  );
 
-  const handleWorkoutCompletion = (day) => {
-    setUserWorkouts((prevWorkouts) =>
-      prevWorkouts.map((workout) =>
-        workout.day === day ? { ...workout, isCompleted: true } : workout
-      )
-    );
-  };
+  const handleWorkoutCompletion = useCallback(
+    async (workoutId) => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/users/workouts/${workoutId}/complete`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-  const handleWorkoutIncompletion = (day) => {
-    setUserWorkouts((prevWorkouts) =>
-      prevWorkouts.map((workout) =>
-        workout.day === day ? { ...workout, isCompleted: false } : workout
-      )
-    );
-  };
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setUserWorkouts((prev) =>
+            prev.map((workout) =>
+              workout.id === workoutId
+                ? { ...workout, isCompleted: true }
+                : workout
+            )
+          );
+          fetchWorkoutStatuses();
+        } else {
+          console.error("Failed to mark workout as complete:", data.message);
+        }
+      } catch (error) {
+        console.error("Error marking workout as complete:", error);
+      }
+    },
+    [token, fetchWorkoutStatuses]
+  );
+
+  const handleWorkoutIncompletion = useCallback(
+    async (workoutId) => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/users/workouts/${workoutId}/incomplete`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setUserWorkouts((prev) =>
+            prev.map((workout) =>
+              workout.id === workoutId
+                ? { ...workout, isCompleted: false }
+                : workout
+            )
+          );
+          fetchWorkoutStatuses();
+        } else {
+          console.error("Failed to mark workout as incomplete:", data.message);
+        }
+      } catch (error) {
+        console.error("Error marking workout as incomplete:", error);
+      }
+    },
+    [token, fetchWorkoutStatuses]
+  );
 
   const value = {
     user,
@@ -207,11 +304,13 @@ export default function UserContextProvider({ children }) {
     removeUser,
     resetData,
     userWorkouts,
+    workoutStatuses,
     handleSave,
     handleWorkoutCompletion,
     handleWorkoutIncompletion,
     handleDelete,
     fetchWorkouts,
+    fetchWorkoutStatuses,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

@@ -25,7 +25,7 @@
     },
     "plugins": ["expo-font"],
     "extras": {
-      "IP_ADDRESS": "192.168.0.106",
+      "IP_ADDRESS": "192.168.0.103",
       "PORT": "3000",
       "URL": ""
     }
