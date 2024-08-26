@@ -27,7 +27,7 @@ export const UserContext = createContext({
   fetchWorkoutStatuses: () => {},
 });
 
-const API_BASE_URL = "http://192.168.0.103:3000"; // Consider using an environment variable for this
+const API_BASE_URL = "http://192.168.0.105:3000"; // Consider using an environment variable for this
 
 export default function UserContextProvider({ children }) {
   const [user, setUser] = useState({
@@ -87,32 +87,6 @@ export default function UserContextProvider({ children }) {
       console.error("Error fetching workouts:", error);
     }
   }, [token]);
-
-  const fetchWorkoutStatuses = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/users/workoutStatus/${user.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setWorkoutStatuses(data.statuses);
-      } else {
-        console.error("Failed to fetch workout statuses:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching workout statuses:", error);
-    }
-  }, [token, user.id]);
 
   useEffect(() => {
     if (token) {
@@ -224,13 +198,19 @@ export default function UserContextProvider({ children }) {
     async (workoutId) => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/users/workouts/${workoutId}/complete`,
+          `${API_BASE_URL}/users/workoutCompletionRecord`,
           {
-            method: "PUT",
+            method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({
+              userId: user.id,
+              workoutId,
+              date: new Date().toISOString().split("T")[0],
+              isCompleted: true,
+            }),
           }
         );
 
@@ -255,20 +235,26 @@ export default function UserContextProvider({ children }) {
         console.error("Error marking workout as complete:", error);
       }
     },
-    [token, fetchWorkoutStatuses]
+    [token, fetchWorkoutStatuses, user.id]
   );
 
   const handleWorkoutIncompletion = useCallback(
     async (workoutId) => {
       try {
         const response = await fetch(
-          `${API_BASE_URL}/users/workouts/${workoutId}/incomplete`,
+          `${API_BASE_URL}/users/workoutCompletionRecord`,
           {
-            method: "PUT",
+            method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({
+              userId: user.id,
+              workoutId,
+              date: new Date().toISOString().split("T")[0],
+              isCompleted: false,
+            }),
           }
         );
 
@@ -293,9 +279,35 @@ export default function UserContextProvider({ children }) {
         console.error("Error marking workout as incomplete:", error);
       }
     },
-    [token, fetchWorkoutStatuses]
+    [token, fetchWorkoutStatuses, user.id]
   );
 
+  // Update fetchWorkoutStatuses to use the new structure
+  const fetchWorkoutStatuses = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/users/workoutStatus/${user.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setWorkoutStatuses(data.statuses);
+      } else {
+        console.error("Failed to fetch workout statuses:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching workout statuses:", error);
+    }
+  }, [token, user.id]);
   const value = {
     user,
     token,
